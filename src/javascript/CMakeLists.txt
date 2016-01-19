@@ -25,7 +25,7 @@ swig_add_module (mraajs javascript mraajs.i ${mraa_LIB_SRCS})
 swig_link_libraries (mraajs ${NODE_LIBRARIES} ${mraa_LIBS})
 
 set_target_properties (mraajs PROPERTIES
-  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -DBUILDING_NODE_EXTENSION -DSWIGJAVASCRIPT=${SWIG_FOUND}"
+  COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -DBUILDING_NODE_EXTENSION  -DSWIGJAVASCRIPT=${SWIG_FOUND}"
   PREFIX ""
   OUTPUT_NAME mraa
   SUFFIX ".node"

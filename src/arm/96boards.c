@@ -61,7 +61,7 @@ mraa_board_t* mraa_96boards()
    if (b == NULL) {
       return NULL;
    }
-
+	fprintf(stderr,"mraa_96boards\n");
    // pin mux for buses are setup by default by kernel so tell mraa to ignore them
    b->no_bus_mux = 1;
 
@@ -128,5 +128,6 @@ mraa_board_t* mraa_96boards()
    b->adc_raw = 0;
    b->adc_supported = 0;
 
+	fprintf(stderr,"mraa_96boards end\n");
    return b;
 }

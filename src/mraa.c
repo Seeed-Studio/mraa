@@ -144,9 +144,9 @@ mraa_init()
 #endif
 
     // Look for IIO devices
-    mraa_iio_detect();
+    //mraa_iio_detect();
 
-    syslog(LOG_NOTICE, "libmraa initialised for platform '%s' of type %d", mraa_get_platform_name(), mraa_get_platform_type());
+    //syslog(LOG_NOTICE, "libmraa initialised for platform '%s' of type %d", mraa_get_platform_name(), mraa_get_platform_type());
     return MRAA_SUCCESS;
 }
 
