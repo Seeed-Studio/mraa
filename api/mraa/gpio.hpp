@@ -69,30 +69,6 @@ typedef enum {
     EDGE_FALLING = 3 /**< Interupt on falling only */
 } Edge;
 
-#if defined(SWIGJAVA)
-
-class IsrCallback
-{
-  friend class Gpio;
-  public:
-    virtual ~IsrCallback()
-    {
-    }
-    virtual void
-    run()
-    { /* empty, overloaded in Java*/
-    }
-
-  protected:
-    static void
-    generic_isr_callback(void* data)
-    {
-        IsrCallback* callback = (IsrCallback*) data;
-        callback->run();
-    }
-};
-#endif
-
 /**
  * @brief API to General Purpose IO
  *
@@ -160,6 +136,9 @@ class Gpio
     static void
     v8isr(uv_work_t* req, int status)
     {
+#if NODE_MODULE_VERSION >= 0x000D
+        v8::HandleScope scope(v8::Isolate::GetCurrent());
+#endif
         mraa::Gpio* This = (mraa::Gpio*) req->data;
         int argc = 1;
         v8::Local<v8::Value> argv[] = { SWIGV8_INTEGER_NEW(-1) };
@@ -196,13 +175,13 @@ class Gpio
 #endif
         return (Result) mraa_gpio_isr(m_gpio, (mraa_gpio_edge_t) mode, &uvwork, this);
     }
-#elif defined(SWIGJAVA)
+#elif defined(SWIGJAVA) || defined(JAVACALLBACK)
     Result
-    isr(Edge mode, IsrCallback* cb)
+    isr(Edge mode, jobject runnable)
     {
-        return (Result) mraa_gpio_isr(m_gpio, (mraa_gpio_edge_t) mode, &IsrCallback::generic_isr_callback, cb);
+        return (Result) mraa_gpio_isr(m_gpio, (mraa_gpio_edge_t) mode, mraa_java_isr_callback, runnable);
     }
-#else
+#endif
     /**
      * Sets a callback to be called when pin value changes
      *
@@ -217,7 +196,7 @@ class Gpio
     {
         return (Result) mraa_gpio_isr(m_gpio, (mraa_gpio_edge_t) mode, fptr, args);
     }
-#endif
+
     /**
      * Exits callback - this call will not kill the isr thread immediatly
      * but only when it is out of it's critical section
@@ -259,6 +238,23 @@ class Gpio
     {
         return (Result )mraa_gpio_dir(m_gpio, (mraa_gpio_dir_t) dir);
     }
+
+    /**
+     * Read Gpio direction
+     *
+     * @throw std::runtime_error in case of failure
+     * @return Result of operation
+     */
+    Dir
+    readDir()
+    {
+        mraa_gpio_dir_t dir;
+        if (mraa_gpio_read_dir(m_gpio, &dir) != MRAA_SUCCESS) {
+            throw std::runtime_error("Failed to read direction");
+        }
+        return (Dir) dir;
+    }
+
     /**
      * Read value from Gpio
      *

@@ -1,6 +1,7 @@
 /*
  * Author: Thomas Ingleby <thomas.c.ingleby@intel.com>
- * Copyright (c) 2014 Intel Corporation.
+ *         Brendan Le Foll <brendan.le.foll@intel.com>
+ * Copyright (c) 2014-2016 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -34,6 +35,8 @@
 #include "x86/intel_nuc5.h"
 #include "x86/intel_minnow_byt_compatible.h"
 #include "x86/intel_sofia_3gr.h"
+#include "x86/intel_cherryhills.h"
+#include "x86/up.h"
 
 mraa_platform_t
 mraa_x86_platform()
@@ -64,17 +67,26 @@ mraa_x86_platform()
                 plat = mraa_intel_nuc5();
             } else if (strncmp(line, "NOTEBOOK", 8) == 0) {
                 platform_type = MRAA_INTEL_MINNOWBOARD_MAX;
-                plat = mraa_intel_minnowboard_byt_compatible();
+                plat = mraa_intel_minnowboard_byt_compatible(0);
             } else if (strncasecmp(line, "MinnowBoard MAX", 15) == 0) {
                 platform_type = MRAA_INTEL_MINNOWBOARD_MAX;
-                plat = mraa_intel_minnowboard_byt_compatible();
+                plat = mraa_intel_minnowboard_byt_compatible(0);
             } else if (strncasecmp(line, "Galileo", 7) == 0) {
                 platform_type = MRAA_INTEL_GALILEO_GEN1;
                 plat = mraa_intel_galileo_rev_d();
             } else if (strncasecmp(line, "MinnowBoard Compatible", 22) == 0) {
-		platform_type = MRAA_INTEL_MINNOWBOARD_MAX;
-		plat = mraa_intel_minnowboard_byt_compatible();
-	    } else {
+                platform_type = MRAA_INTEL_MINNOWBOARD_MAX;
+                plat = mraa_intel_minnowboard_byt_compatible(1);
+            } else if (strncasecmp(line, "MinnowBoard Turbot", 18) == 0) {
+                platform_type = MRAA_INTEL_MINNOWBOARD_MAX;
+                plat = mraa_intel_minnowboard_byt_compatible(1);
+            } else if (strncasecmp(line, "Braswell Cherry Hill", 20) == 0) {
+                platform_type = MRAA_INTEL_CHERRYHILLS;
+                plat = mraa_intel_cherryhills();
+            } else if (strncasecmp(line, "UP-CHT01", 8) == 0) {
+                platform_type = MRAA_UP;
+                plat = mraa_up_board();
+            } else {
                 syslog(LOG_ERR, "Platform not supported, not initialising");
                 platform_type = MRAA_UNKNOWN_PLATFORM;
             }
@@ -110,6 +122,10 @@ mraa_x86_platform()
     plat = mraa_intel_nuc5();
     #elif defined(xMRAA_INTEL_SOFIA_3GR)
     plat = mraa_intel_sofia_3gr();
+    #elif defined(xMRAA_INTEL_CHERRYHILLS)
+    plat = mraa_intel_cherryhills();
+    #elif defined(xMRAA_UP)
+    plat = mraa_up_board();
     #else
         #error "Not using a valid platform value from mraa_platform_t - cannot compile"
     #endif

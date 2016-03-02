@@ -25,7 +25,6 @@
 import mraa.Dir;
 import mraa.Edge;
 import mraa.Gpio;
-import mraa.IsrCallback;
 
 public class Isr {
     static {
@@ -39,18 +38,28 @@ public class Isr {
         }
     }
     public static void main(String argv[]) throws InterruptedException {
-        Gpio gpio = new Gpio(6);
+        int pin = 6;
+        if (argv.length == 1) {
+            try {
+                pin = Integer.parseInt(argv[0]);
+            } catch (Exception e) {
+            }
+        }
+        System.out.println("Starting ISR for pin " + Integer.toString(pin));
+        Gpio gpio = new Gpio(pin);
 
-        IsrCallback callback = new JavaCallback();
+        Runnable callback = new JavaCallback();
 
         gpio.isr(Edge.EDGE_RISING, callback);
         while (true)
             Thread.sleep(999999);
     };
+
 }
 
-class JavaCallback extends IsrCallback {
-    public JavaCallback() { super(); }
-
-    public void run() { System.out.println("JavaCallback.run()"); }
+class JavaCallback implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("Gpio level changed");
+    }
 }

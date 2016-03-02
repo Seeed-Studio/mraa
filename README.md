@@ -23,6 +23,7 @@ X86
 * [Intel DE3815](../master/docs/intel_de3815.md)
 * [Minnowboard Max](../master/docs/minnow_max.md)
 * [NUC 5th generation](../master/docs/intel_nuc5.md)
+* [UP](../master/docs/up.md)
 
 ARM
 ---
@@ -42,7 +43,7 @@ based yocto poky image that supports opkg. Adding this repository is as simple
 as and you'll have the latest stable tagged build of mraa installed!
 
 ``` bash
-echo "src mraa-upm http://iotdk.intel.com/repos/2.0/intelgalactic" > /etc/opkg/mraa-upm.conf
+echo "src mraa-upm http://iotdk.intel.com/repos/3.0/intelgalactic/opkg/i586" > /etc/opkg/mraa-upm.conf
 opkg update
 opkg install mraa
 ```
@@ -51,7 +52,7 @@ If you would like to get the latest & greatest builds from master HEAD you can
 use our -dev repository
 
 ```bash
-echo "src mraa-upm http://iotdk.intel.com/repos/2.0/intelgalactic-dev" > /etc/opkg/mraa-upm.conf
+echo "src mraa-upm http://iotdk.intel.com/repos/3.0/intelgalactic-dev/opkg/i586" > /etc/opkg/mraa-upm.conf
 opkg update
 opkg install mraa
 ```
@@ -89,6 +90,15 @@ API Documentation
 <a href="http://java.mraa.io"><img src="http://iotdk.intel.com/misc/logos/java.png"/></a>
 <a href="http://py.mraa.io"><img src="http://iotdk.intel.com/misc/logos/python.png"/></a>
 <a href="http://js.mraa.io"><img src="http://iotdk.intel.com/misc/logos/node.png"/></a>
+
+Contact Us
+==========
+
+To ask questions eithe file issues in github or send emails on our [mailing
+list](https://lists.01.org/mailman/listinfo/mraa). You might also catch us on
+the mraa channel on freenode IRC.
+
+See the [Contribution](CONTRIBUTING.md) documentation for more details.
 
 Changelog
 =========

@@ -1,9 +1,6 @@
 /*
- * Author: Srinivas Kandagatla <srinivas.kandagatla@linaro.org>
- * Copyright (c) 2015 Linaro Limited.
- * Copyright (c) 2014 Intel Corporation.
- *
- * Copied from include/arm/banana.h
+ * Author: Karena Anum Kamaruzaman <karena.anum.kamaruzaman@intel.com>
+ * Copyright (c) 2016 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -33,13 +30,11 @@ extern "C" {
 
 #include "mraa_internal.h"
 
-#define MRAA_96BOARDS_LS_GPIO_COUNT 12
-#define MRAA_96BOARDS_LS_I2C_COUNT  2
-#define MRAA_96BOARDS_LS_SPI_COUNT  1
-#define MRAA_96BOARDS_LS_UART_COUNT 2
-#define MRAA_96BOARDS_LS_PIN_COUNT  40
+// +1 as pins are "1 indexed"
+#define MRAA_INTEL_CHERRYHILLS_PINCOUNT (5 + 1)
 
-mraa_board_t* mraa_96boards();
+mraa_board_t*
+mraa_intel_cherryhills();
 
 #ifdef __cplusplus
 }

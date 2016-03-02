@@ -1,7 +1,7 @@
 /*
  * Author: Brendan Le Foll <brendan.le.foll@intel.com>
  * Author: Thomas Ingleby <thomas.c.ingleby@intel.com>
- * Copyright (c) 2014 Intel Corporation.
+ * Copyright (c) 2014-2016 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -45,12 +45,12 @@
 #include "gpio.h"
 #include "version.h"
 
-#define MAX_PLATFORM_NAME_LENGTH 128
 #define IIO_DEVICE_WILDCARD "iio:device*"
 mraa_board_t* plat = NULL;
 mraa_iio_info_t* plat_iio = NULL;
 
-static char platform_name[MAX_PLATFORM_NAME_LENGTH];
+static char* platform_name = NULL;
+static char* platform_long_name = NULL;
 
 static int num_i2c_devices = 0;
 static int num_iio_devices = 0;
@@ -116,8 +116,11 @@ mraa_init()
 #error mraa_ARCH NOTHING
 #endif
 
-    if (plat != NULL)
+    if (plat != NULL) {
         plat->platform_type = platform_type;
+    } else {
+        platform_name = NULL;
+    }
 
 #if defined(USBPLAT)
     // This is a platform extender so create null base platform if one doesn't already exist
@@ -128,13 +131,13 @@ mraa_init()
             plat->platform_name = "Unknown platform";
         }
     }
-    // Now detect sub platform
+    // Now detect sub platform, note this is not an else since we could be in
+    // an error case and fall through to MRAA_ERROR_PLATFORM_NOT_INITIALISED
     if (plat != NULL) {
         mraa_platform_t usb_platform_type = mraa_usb_platform_extender(plat);
+        // if we have no known platform just replace usb platform with platform
         if (plat->platform_type == MRAA_UNKNOWN_PLATFORM && usb_platform_type != MRAA_UNKNOWN_PLATFORM) {
             plat->platform_type = usb_platform_type;
-        } else {
-            return MRAA_ERROR_PLATFORM_NOT_INITIALISED;
         }
     }
     if (plat == NULL) {
@@ -144,9 +147,23 @@ mraa_init()
 #endif
 
     // Look for IIO devices
-    //mraa_iio_detect();
+    mraa_iio_detect();
 
-    //syslog(LOG_NOTICE, "libmraa initialised for platform '%s' of type %d", mraa_get_platform_name(), mraa_get_platform_type());
+    if (plat != NULL) {
+        int length = strlen(plat->platform_name) + 1;
+        if (mraa_has_sub_platform()) {
+            // Account for ' + ' chars
+            length += strlen(plat->sub_platform->platform_name) + 3;
+        }
+        platform_name = calloc(length, sizeof(char));
+        if (mraa_has_sub_platform()) {
+            snprintf(platform_name, length, "%s + %s", plat->platform_name, plat->sub_platform->platform_name);
+        } else {
+            strncpy(platform_name, plat->platform_name, length);
+        }
+    }
+
+    syslog(LOG_NOTICE, "libmraa initialised for platform '%s' of type %d", mraa_get_platform_name(), mraa_get_platform_type());
     return MRAA_SUCCESS;
 }
 
@@ -457,20 +474,23 @@ mraa_get_platform_adc_supported_bits(int platform_offset)
     }
 }
 
-
-char*
+const char*
 mraa_get_platform_name()
+{
+    return platform_name;
+}
+
+const char*
+mraa_get_platform_version(int platform_offset)
 {
     if (plat == NULL) {
         return NULL;
     }
-    if (mraa_has_sub_platform()) {
-        snprintf(platform_name, MAX_PLATFORM_NAME_LENGTH, "%s + %s", plat->platform_name, plat->sub_platform->platform_name);
+    if (platform_offset == MRAA_MAIN_PLATFORM_OFFSET) {
+        return plat->platform_version;
     } else {
-        strncpy(platform_name, plat->platform_name, MAX_PLATFORM_NAME_LENGTH-1);
+        return plat->sub_platform->platform_version;
     }
-
-    return platform_name;
 }
 
 int
@@ -578,7 +598,7 @@ mraa_file_contains(const char* filename, const char* content)
     char* file = mraa_file_unglob(filename);
     if (file != NULL) {
         size_t len = 1024;
-        char* line = malloc(len);
+        char* line = calloc(len, sizeof(char));
         if (line == NULL) {
             free(file);
             return 0;
@@ -613,7 +633,7 @@ mraa_file_contains_both(const char* filename, const char* content, const char* c
     char* file = mraa_file_unglob(filename);
     if (file != NULL) {
         size_t len = 1024;
-        char* line = malloc(len);
+        char* line = calloc(len, sizeof(char));
         if (line == NULL) {
             free(file);
             return 0;
@@ -783,18 +803,4 @@ int
 mraa_get_iio_device_count()
 {
     return plat_iio->iio_device_count;
-}
-
-int
-mraa_find_iio_device(const char* devicename)
-{
-    int i = 0;
-    for (i; i < plat_iio->iio_device_count; i++) {
-#if 0
-        // compare with devices array
-        if (!strcmp() {
-        }
-#endif
-    }
-    return 0;
 }

@@ -12,7 +12,7 @@ what you'll need:
 * [git](http://git-scm.com)
 * [python](http://python.org) 2.7 or 3.4+ (you'll need not just the interpreter but python-dev)
 * [node.js](http://nodejs.org) 0.10.x or 0.12.x (you'll need not just the interpreter but nodejs-dev)
-* [CMake](http://cmake.org) 2.8.8+
+* [CMake](http://cmake.org) 2.8.8+ (3.1+ is recommended for node.js version 2+)
 
 For Debian-like distros the below command installs the basic set:
 
@@ -163,6 +163,8 @@ To run, make sure `libmraajava.so` is in `LD_LIBRARY_PATH`
  ~~~~~~~~~~~~~{.sh}
 jave -cp $DIR_WHERE_YOU_INSTALLED_MRAA/mraa.jar:. Example
 ~~~~~~~~~~~~~
+
+If you want to add or improve Java bindings for mraa, please follow the [Creating Java Bindings Guide](https://github.com/intel-iot-devkit/upm/blob/master/docs/creating_java_bindings.md).
 
 ## Building an IPK/RPM package using `cpack`
 

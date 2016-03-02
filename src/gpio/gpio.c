@@ -234,22 +234,55 @@ mraa_gpio_wait_interrupt(int fd
     return MRAA_SUCCESS;
 }
 
+#if defined(SWIGJAVA) || defined(JAVACALLBACK)
+pthread_key_t env_key;
+
+extern JavaVM *globVM;
+static pthread_once_t env_key_init = PTHREAD_ONCE_INIT;
+
+jmethodID runGlobal;
+
+static void make_env_key(void)
+{
+
+    JNIEnv *jenv;
+    (*globVM)->GetEnv(globVM, (void **)&jenv, JNI_VERSION_1_6);
+
+    jclass rcls = (*jenv)->FindClass(jenv, "java/lang/Runnable");
+    jmethodID runm = (*jenv)->GetMethodID(jenv, rcls, "run", "()V");
+
+    runGlobal = (jmethodID)(*jenv)->NewGlobalRef(jenv, (jobject)runm);
+
+    pthread_key_create(&env_key, NULL);
+}
+
+void mraa_java_isr_callback(void* data)
+{
+    JNIEnv *jenv = (JNIEnv *) pthread_getspecific(env_key);
+    (*jenv)->CallVoidMethod(jenv, (jobject)data, runGlobal);
+}
+
+#endif
+
 static void*
 mraa_gpio_interrupt_handler(void* arg)
 {
     mraa_gpio_context dev = (mraa_gpio_context) arg;
-    if (IS_FUNC_DEFINED(dev, gpio_interrupt_handler_replace))
-        return dev->advance_func->gpio_interrupt_handler_replace(dev);
-
+    int fp = -1;
     mraa_result_t ret;
 
-    // open gpio value with open(3)
-    char bu[MAX_SIZE];
-    sprintf(bu, SYSFS_CLASS_GPIO "/gpio%d/value", dev->pin);
-    int fp = open(bu, O_RDONLY);
-    if (fp < 0) {
-        syslog(LOG_ERR, "gpio: failed to open gpio%d/value", dev->pin);
-        return NULL;
+    if (IS_FUNC_DEFINED(dev, gpio_interrupt_handler_init_replace)) {
+        if (dev->advance_func->gpio_interrupt_handler_init_replace(dev) != MRAA_SUCCESS)
+            return NULL;
+    } else {
+        // open gpio value with open(3)
+        char bu[MAX_SIZE];
+        sprintf(bu, SYSFS_CLASS_GPIO "/gpio%d/value", dev->pin);
+        fp = open(bu, O_RDONLY);
+        if (fp < 0) {
+            syslog(LOG_ERR, "gpio: failed to open gpio%d/value", dev->pin);
+            return NULL;
+        }
     }
 
 #ifndef HAVE_PTHREAD_CANCEL
@@ -262,12 +295,32 @@ mraa_gpio_interrupt_handler(void* arg)
 
     dev->isr_value_fp = fp;
 
+#if defined(SWIGJAVA) || defined(JAVACALLBACK)
+    JNIEnv *jenv;
+    if(dev->isr == mraa_java_isr_callback) {
+        jint err = (*globVM)->AttachCurrentThreadAsDaemon(globVM, (void **)&jenv, NULL);
+
+        if (err != JNI_OK) {
+                close(dev->isr_value_fp);
+                dev->isr_value_fp = -1;
+                return NULL;
+        }
+
+        pthread_once(&env_key_init, make_env_key);
+        pthread_setspecific(env_key, jenv);
+    }
+#endif
+
     for (;;) {
-        ret = mraa_gpio_wait_interrupt(dev->isr_value_fp
+        if (IS_FUNC_DEFINED(dev, gpio_wait_interrupt_replace)) {
+            ret = dev->advance_func->gpio_wait_interrupt_replace(dev);
+        } else {
+            ret = mraa_gpio_wait_interrupt(dev->isr_value_fp
 #ifndef HAVE_PTHREAD_CANCEL
                 , dev->isr_control_pipe[0]
 #endif
                 );
+        }
         if (ret == MRAA_SUCCESS && !dev->isr_thread_terminating) {
 #ifdef HAVE_PTHREAD_CANCEL
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
@@ -345,8 +398,17 @@ mraa_gpio_interrupt_handler(void* arg)
 #ifdef HAVE_PTHREAD_CANCEL
             pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, NULL);
 #endif
-            close(dev->isr_value_fp);
-            dev->isr_value_fp = -1;
+            if (fp != -1) {
+                close(dev->isr_value_fp);
+                dev->isr_value_fp = -1;
+            }
+#if defined(SWIGJAVA) || defined(JAVACALLBACK)
+
+            if(dev->isr == mraa_java_isr_callback) {
+                (*jenv)->DeleteGlobalRef(jenv, (jobject)dev->isr_args);
+                (*globVM)->DetachCurrentThread(globVM);
+            }
+#endif
             return NULL;
         }
     }
@@ -414,6 +476,16 @@ mraa_gpio_isr(mraa_gpio_context dev, mraa_gpio_edge_t mode, void (*fptr)(void*),
     }
 
     dev->isr = fptr;
+#if defined(SWIGJAVA) || defined(JAVACALLBACK)
+    JNIEnv *jenv;
+    /* Most UPM sensors use the C API, the global ref must be created here. */
+    /* The reason for checking the callback function is internal callbacks. */
+    if (fptr == mraa_java_isr_callback) {
+        (*globVM)->GetEnv(globVM, (void **)&jenv, JNI_VERSION_1_6);
+        jobject grunnable = (*jenv)->NewGlobalRef(jenv, (jobject) args);
+        args = (void *) grunnable;
+    }
+#endif
     dev->isr_args = args;
     pthread_create(&dev->thread_id, NULL, mraa_gpio_interrupt_handler, (void*) dev);
 
@@ -589,6 +661,38 @@ mraa_gpio_dir(mraa_gpio_context dev, mraa_gpio_dir_t dir)
     if (IS_FUNC_DEFINED(dev, gpio_dir_post))
         return dev->advance_func->gpio_dir_post(dev, dir);
     return MRAA_SUCCESS;
+}
+
+mraa_result_t
+mraa_gpio_read_dir(mraa_gpio_context dev, mraa_gpio_dir_t *dir)
+{
+    char value[5];
+    char filepath[MAX_SIZE];
+    int fd, rc;
+    mraa_result_t result = MRAA_SUCCESS;
+
+    snprintf(filepath, MAX_SIZE, SYSFS_CLASS_GPIO "/gpio%d/direction", dev->pin);
+    fd = open(filepath, O_RDONLY);
+    if (fd == -1) {
+        return MRAA_ERROR_INVALID_RESOURCE;
+    }
+
+    memset(value, '\0', sizeof(value));
+    rc = read(fd, value, sizeof(value));
+    close(fd);
+    if (rc <= 0) {
+        return MRAA_ERROR_INVALID_RESOURCE;
+    }
+
+    if (strcmp(value, "out\n") == 0) {
+        *dir = MRAA_GPIO_OUT;
+    } else if (strcmp(value, "in\n") == 0) {
+        *dir = MRAA_GPIO_IN;
+    } else {
+        result = MRAA_ERROR_INVALID_RESOURCE;
+    }
+
+    return result;
 }
 
 int

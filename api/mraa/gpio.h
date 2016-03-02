@@ -44,6 +44,12 @@ extern "C" {
 #include <Python.h>
 #endif
 
+#if defined(SWIGJAVA) || defined(JAVACALLBACK)
+#include <jni.h>
+extern JavaVM *globVM;
+extern void mraa_java_isr_callback(void *);
+#endif
+
 #include <stdio.h>
 #include <pthread.h>
 
@@ -147,6 +153,15 @@ mraa_result_t mraa_gpio_mode(mraa_gpio_context dev, mraa_gpio_mode_t mode);
  * @return Result of operation
  */
 mraa_result_t mraa_gpio_dir(mraa_gpio_context dev, mraa_gpio_dir_t dir);
+
+/**
+ * Read Gpio direction
+ *
+ * @param dev The Gpio context
+ * @param dir The address where to store the Gpio direction
+ * @return Result of operation
+ */
+mraa_result_t mraa_gpio_read_dir(mraa_gpio_context dev, mraa_gpio_dir_t *dir);
 
 /**
  * Close the Gpio context

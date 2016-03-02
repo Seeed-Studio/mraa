@@ -162,7 +162,7 @@ mraa_pwm_read_duty(mraa_pwm_context dev)
 static mraa_pwm_context
 mraa_pwm_init_internal(mraa_adv_func_t* func_table, int chipin, int pin)
 {
-    mraa_pwm_context dev = (mraa_pwm_context) malloc(sizeof(struct _pwm));
+    mraa_pwm_context dev = (mraa_pwm_context) calloc(1,sizeof(struct _pwm));
     if (dev == NULL) {
         return NULL;
     }
@@ -184,6 +184,10 @@ mraa_pwm_init(int pin)
     }
     if (mraa_is_sub_platform_id(pin)) {
         syslog(LOG_NOTICE, "pwm: Using sub platform is not supported");
+        return NULL;
+    }
+    if (pin < 0 || pin > plat->phy_pin_count) {
+        syslog(LOG_ERR, "pwm: pin %i beyond platform definition", pin);
         return NULL;
     }
     if (plat->pins[pin].capabilites.pwm != 1) {

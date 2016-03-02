@@ -1,4 +1,4 @@
-Contributing to libmraa                           {#contributing} 
+Contributing to libmraa                           {#contributing}
 ======================
 
 libmraa is an opensource project and we are actively looking for people to help
@@ -13,7 +13,8 @@ requests to the main project. You can open issues if you find any bugs/have
 questions.
 
 If you'd rather not use github you are more than welcome to send git formatted
-patches to brendan.le.foll@intel.com.
+patches to our mailing list mraa@lists.01.org which you can register for access
+on: https://lists.01.org/mailman/listinfo/mraa
 
 Basic rules
 -----------

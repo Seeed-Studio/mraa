@@ -1,6 +1,7 @@
 /*
  * Author: Thomas Ingleby <thomas.c.ingleby@intel.com>
- * Copyright (c) 2014 Intel Corporation.
+ *         Brendan Le Foll <brendan.le.foll@intel.com>
+ * Copyright (c) 2014-2016 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -28,6 +29,7 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
+#include <errno.h>
 
 #include "common.h"
 #include "x86/intel_edison_fab_c.h"
@@ -424,6 +426,7 @@ mraa_intel_edison_spi_init_pre(int bus)
         mraa_intel_edison_pinmode_change(109, 1);
         return MRAA_SUCCESS;
     }
+
     mraa_gpio_write(tristate, 0);
 
     mraa_gpio_context io10_out = mraa_gpio_init_raw(258);
@@ -788,7 +791,7 @@ mraa_intel_edison_miniboard(mraa_board_t* b)
     b->pwm_max_period = 218453;
     b->pwm_min_period = 1;
 
-    b->pins = (mraa_pininfo_t*) malloc(sizeof(mraa_pininfo_t) * 56);
+    b->pins = (mraa_pininfo_t*) calloc(b->phy_pin_count, sizeof(mraa_pininfo_t));
     if (b->pins == NULL) {
         return MRAA_ERROR_UNSPECIFIED;
     }
@@ -1150,20 +1153,87 @@ mraa_intel_edison_miniboard(mraa_board_t* b)
     return MRAA_SUCCESS;
 }
 
+mraa_boolean_t
+is_arduino_board()
+{
+    // We check for two things to determine if that's an Arduino expansion board
+    // 1) is tristate GPIO available, by trying to initialize it
+    // 2) are there four specific GPIO expanders, by reading device labels
+    //        /sys/class/gpio/gpiochip{200,216,232,248}/label == "pcal9555a"
+    char gpiochip_path[MAX_SIZE];
+    char gpiochip_label[MAX_SIZE];
+    const char gpiochip_label_arduino[] = "pcal9555a";
+    const int gpiochip_idx[4] = { 200, 216, 232, 248 };
+
+    // prepare format string for fscanf, based on MAX_SIZE
+    char format_str[MAX_SIZE];
+    snprintf(format_str, MAX_SIZE, "%%%ds", MAX_SIZE - 1);
+    int i, ret, errno_saved;
+
+    // check tristate first
+    tristate = mraa_gpio_init_raw(214);
+    if (tristate == NULL) {
+        syslog(LOG_INFO, "edison: tristate not detected");
+        return 0;
+    }
+
+    // GPIO expanders second
+    for (i=0; i<(sizeof(gpiochip_idx)/sizeof(gpiochip_idx[0])); i++) {
+        memset(gpiochip_path, 0, MAX_SIZE);
+        snprintf(gpiochip_path,
+                 MAX_SIZE,
+                 SYSFS_CLASS_GPIO "/gpiochip%d/label",
+                 gpiochip_idx[i]);
+        FILE *fp;
+        fp = fopen(gpiochip_path, "r");
+        if (fp == NULL) {
+            syslog(LOG_INFO,
+                   "edison: could not open '%s', errno %d",
+                   gpiochip_path,
+                   errno);
+            return 0;
+        }
+
+        memset(gpiochip_label, 0, MAX_SIZE);
+        ret = fscanf(fp, format_str, &gpiochip_label);
+        errno_saved = errno;
+        fclose(fp);
+        if (ret != 1) {
+            syslog(LOG_INFO,
+                   "edison: could not read from '%s', errno %d",
+                   gpiochip_path,
+                   errno_saved);
+            return 0;
+        }
+
+        // we want to check for exact match
+        if (strncmp(gpiochip_label, gpiochip_label_arduino, strlen(gpiochip_label) + 1) != 0) {
+            syslog(LOG_INFO,
+                   "edison: gpiochip label (%s) is not what we expect (%s)\n",
+                   gpiochip_label,
+                   gpiochip_label_arduino);
+            return 0;
+        }
+    }
+
+    syslog(LOG_NOTICE, "edison: Arduino board detected");
+    return 1;
+}
+
 mraa_board_t*
 mraa_intel_edison_fab_c()
 {
+    mraa_gpio_dir_t tristate_dir;
     mraa_board_t* b = (mraa_board_t*) calloc(1, sizeof(mraa_board_t));
     if (b == NULL) {
         return NULL;
     }
 
     b->platform_name = PLATFORM_NAME;
-    // This seciton will also check if the arduino board is there
-    tristate = mraa_gpio_init_raw(214);
-    if (tristate == NULL) {
-        syslog(LOG_INFO, "edison: Failed to initialise Arduino board TriState,\
-                assuming Intel Edison Miniboard\n");
+
+    if (is_arduino_board() == 0) {
+        syslog(LOG_NOTICE,
+               "edison: Arduino board not detected, assuming Intel Edison Miniboard");
         if (mraa_intel_edison_miniboard(b) != MRAA_SUCCESS) {
             goto error;
         }
@@ -1173,6 +1243,7 @@ mraa_intel_edison_fab_c()
     b->phy_pin_count = 20;
     b->gpio_count = 14;
     b->aio_count = 6;
+    b->platform_version = "arduino";
 
     b->adv_func = (mraa_adv_func_t*) calloc(1, sizeof(mraa_adv_func_t));
     if (b->adv_func == NULL) {
@@ -1197,13 +1268,22 @@ mraa_intel_edison_fab_c()
     b->adv_func->gpio_mmap_setup = &mraa_intel_edison_mmap_setup;
     b->adv_func->spi_lsbmode_replace = &mraa_intel_edison_spi_lsbmode_replace;
 
-    b->pins = (mraa_pininfo_t*) malloc(sizeof(mraa_pininfo_t) * MRAA_INTEL_EDISON_PINCOUNT);
+    b->pins = (mraa_pininfo_t*) calloc(MRAA_INTEL_EDISON_PINCOUNT, sizeof(mraa_pininfo_t));
     if (b->pins == NULL) {
         free(b->adv_func);
         goto error;
     }
 
-    mraa_gpio_dir(tristate, MRAA_GPIO_OUT);
+    if (mraa_gpio_read_dir(tristate, &tristate_dir) != MRAA_SUCCESS) {
+       free(b->adv_func);
+       goto error;
+    }
+
+    if (tristate_dir != MRAA_GPIO_OUT) {
+        mraa_gpio_dir(tristate, MRAA_GPIO_OUT);
+    }
+
+    // this is required to initialise not just SPI but also the ADC channels
     mraa_intel_edison_misc_spi();
 
     b->adc_raw = 12;

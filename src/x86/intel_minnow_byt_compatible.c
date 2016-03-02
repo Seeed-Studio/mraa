@@ -84,22 +84,27 @@ mraa_get_pin_index(mraa_board_t* board, char* name, int* pin_index)
 }
 
 mraa_board_t*
-mraa_intel_minnowboard_byt_compatible()
+mraa_intel_minnowboard_byt_compatible(mraa_boolean_t turbot)
 {
     mraa_board_t* b = (mraa_board_t*) calloc(1, sizeof(mraa_board_t));
 
     struct utsname running_uname;
-    int uname_major, uname_minor, max_pins[27];
+    int uname_major, uname_minor, max_pins[28];
 
     if (b == NULL) {
         return NULL;
     }
 
     b->platform_name = PLATFORM_NAME;
-    b->phy_pin_count = MRAA_INTEL_MINNOW_MAX_PINCOUNT;
-    b->gpio_count = MRAA_INTEL_MINNOW_MAX_PINCOUNT;
+    if (turbot) {
+        b->platform_version = "Turbot";
+        b->gpio_count = b->phy_pin_count = MRAA_INTEL_MINNOW_TURBOT_PINCOUNT;
+    } else {
+        b->platform_version = "Ax";
+        b->gpio_count = b->phy_pin_count = MRAA_INTEL_MINNOW_MAX_PINCOUNT;
+    }
 
-    b->pins = (mraa_pininfo_t*) malloc(sizeof(mraa_pininfo_t) * MRAA_INTEL_MINNOW_MAX_PINCOUNT);
+    b->pins = (mraa_pininfo_t*) calloc(b->phy_pin_count, sizeof(mraa_pininfo_t));
     if (b->pins == NULL) {
         goto error;
     }
@@ -155,7 +160,12 @@ mraa_intel_minnowboard_byt_compatible()
     mraa_set_pininfo(b, 24, "PWM1", (mraa_pincapabilities_t){ 1, 0, 1, 0, 0, 0, 0, 0 },
                      249); // Assume BIOS configured for PWM
     mraa_set_pininfo(b, 25, "S5_4", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 }, 84);
-    mraa_set_pininfo(b, 26, "IBL8254", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 }, 208);
+    if (turbot) {
+        mraa_set_pininfo(b, 26, "I2S_MCLK", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 }, 253);
+        mraa_set_pininfo(b, 27, "S5_22", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 }, 104);
+    } else {
+        mraa_set_pininfo(b, 26, "IBL8254", (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 }, 208);
+    }
 
     // Set number of i2c adaptors usable from userspace
     b->i2c_bus_count = 1;
