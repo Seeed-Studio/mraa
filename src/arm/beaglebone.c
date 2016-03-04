@@ -23,6 +23,7 @@
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
@@ -32,9 +33,13 @@
 #include "arm/beaglebone.h"
 
 #define NUM2STR(x) #x
+#define DT_BASE "/sys/firmware/devicetree/base"
 
-#define PLATFORM_NAME_BEAGLEBONE_BLACK_REV_B "Beaglebone Black Rev. B"
-#define PLATFORM_NAME_BEAGLEBONE_BLACK_REV_C "Beaglebone Black Rev. C"
+#define PLATFORM_NAME_BEAGLEBONE_BLACK "Beaglebone Black"
+#define PLATFORM_NAME_BEAGLEBONE_GREEN "Beaglebone Green"
+#define PLATFORM_NAME_BEAGLEBONE_GREEN_WIRELESS "Beaglebone Green Wireless"
+#define PLATFORM_NAME_BEAGLEBONE_ENHANCED "Beaglebone Enhanced"
+
 
 #define SYSFS_DEVICES_CAPEMGR_SLOTS "/sys/devices/bone_capemgr.*/slots"
 #define SYSFS_CLASS_PWM "/sys/class/pwm/"
@@ -390,22 +395,22 @@ mraa_beaglebone()
     unsigned int ehrpwm2a_enabled = 0;
     unsigned int ehrpwm2b_enabled = 0;
     unsigned int is_rev_c = 0;
-    size_t len = 0;
-    char* line = NULL;
 
-    FILE* fh;
-    fh = fopen(SYSFS_CLASS_MMC "mmc1/mmc1:0001/name", "r");
-    if (fh != NULL) {
-        emmc_enabled = 1;
-        if (getline(&line, &len, fh) != -1) {
-            if (strstr(line, "MMC04G")) {
-                is_rev_c = 1;
-            }
-        }
-        fclose(fh);
-        free(line);
-    } else
-        emmc_enabled = 0;
+	if (mraa_file_exist(SYSFS_CLASS_MMC "mmc1/mmc1:0001/name")) {
+			 emmc_enabled = 1;
+		}
+	if (mraa_file_exist(DT_BASE "/model")) {
+		 // We are on a modern kernel, great!!!!
+		 if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green")) {
+		 		is_rev_c = 3;
+		 } else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green Wireless")) {
+		 		is_rev_c = 2;
+	 	}else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Black")) {
+		 		is_rev_c = 1;
+	 	}else if (mraa_file_contains(DT_BASE "/model", "SanCloud BeagleBone Enhanced")) {
+		 		is_rev_c = 0;
+	 	}
+	}
 
 
     if (mraa_file_exist("/sys/devices/ocp.*/hdmi.*"))
@@ -491,15 +496,23 @@ mraa_beaglebone()
     mraa_board_t* b = (mraa_board_t*) calloc(1, sizeof(mraa_board_t));
     if (b == NULL)
         return NULL;
-    // TODO: Detect Beaglebone Black Revisions, for now always TYPE B
     if (is_rev_c == 0) {
-        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK_REV_B;
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_ENHANCED;
         b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
     }
     if (is_rev_c == 1) {
-        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK_REV_C;
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK;
         b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
     }
+    if (is_rev_c == 2) {
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_GREEN_WIRELESS;
+        b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
+    }
+    if (is_rev_c == 3) {
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_GREEN;
+        b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
+    }
+
 
     if (b->platform_name == NULL) {
         goto error;

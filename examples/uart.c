@@ -31,7 +31,7 @@ int
 main(int argc, char** argv)
 {
     mraa_uart_context uart;
-    uart = mraa_uart_init(0);
+    uart = mraa_uart_init(1);
 
     if (uart == NULL) {
         fprintf(stderr, "UART failed to setup\n");
