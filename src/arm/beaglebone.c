@@ -41,14 +41,14 @@
 #define PLATFORM_NAME_BEAGLEBONE_ENHANCED "Beaglebone Enhanced"
 
 
-#define SYSFS_DEVICES_CAPEMGR_SLOTS "/sys/devices/bone_capemgr.*/slots"
+#define SYSFS_DEVICES_CAPEMGR_SLOTS "/sys/devices/platform/bone_capemgr/slots"
 #define SYSFS_CLASS_PWM "/sys/class/pwm/"
 #define SYSFS_CLASS_MMC "/sys/class/mmc_host/"
 #define SYSFS_PWM_OVERLAY "am33xx_pwm"
-#define UART_OVERLAY(x) "ADAFRUIT-UART" NUM2STR(x)
+#define UART_OVERLAY(x) "BB-UART" NUM2STR(x)
 //#define ADAFRUIT_SPI_OVERLAY "ADAFRUIT-SPI%d"
-#define SPI_OVERLAY(x) "BB-SPI" NUM2STR(x) "-01"
-#define I2C_OVERLAY(x) "ADAFRUIT-I2C" NUM2STR(x)
+#define SPI_OVERLAY(x) "BB-SPIDEV" NUM2STR(x) "-01"
+#define I2C_OVERLAY(x) "BB-I2C" NUM2STR(x)
 #define MAX_SIZE 64
 
 #define MMAP_PATH "/dev/mem"
@@ -438,27 +438,27 @@ mraa_beaglebone()
     else
         spi1_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO1"))
+    if (mraa_file_exist("/dev/ttyO1"))
         uart1_enabled = 1;
     else
         uart1_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO2"))
+    if (mraa_file_exist("/dev/ttyO2"))
         uart2_enabled = 1;
     else
         uart2_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO3"))
+    if (mraa_file_exist("/dev/ttyO3"))
         uart3_enabled = 1;
     else
         uart3_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO4"))
+    if (mraa_file_exist("/dev/ttyO4"))
         uart4_enabled = 1;
     else
         uart4_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO5"))
+    if (mraa_file_exist("/dev/ttyO5"))
         uart5_enabled = 1;
     else
         uart5_enabled = 0;
@@ -1420,16 +1420,21 @@ mraa_beaglebone()
     b->def_uart_dev = 0;
     b->uart_dev[0].rx = 46 + 26;
     b->uart_dev[0].tx = 46 + 24;
+	b->uart_dev[0].device_path = "/dev/ttyO1";
     b->uart_dev[1].rx = 46 + 22;
     b->uart_dev[1].tx = 46 + 21;
+	b->uart_dev[1].device_path = "/dev/ttyO2";
     // TODO
     b->uart_dev[2].rx = 0;
     b->uart_dev[2].tx = 42;
+	b->uart_dev[2].device_path = "/dev/ttyO3";
 
     b->uart_dev[3].rx = 46 + 11;
     b->uart_dev[3].tx = 46 + 13;
+	b->uart_dev[3].device_path = "/dev/ttyO4";
     b->uart_dev[4].rx = 38;
     b->uart_dev[4].tx = 37;
+	b->uart_dev[4].device_path = "/dev/ttyO5";
 
     b->gpio_count = 0;
     int i;
