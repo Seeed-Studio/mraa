@@ -418,15 +418,16 @@ mraa_beaglebone()
     else
         hdmi_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/i2c-dev/i2c-0"))
+    if (mraa_file_exist("/dev/i2c-0"))
         i2c0_enabled = 1;
     else
         i2c0_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/i2c-dev/i2c-1"))
+    if (mraa_file_exist("/dev/i2c-2"))
         i2c1_enabled = 1;
     else
         i2c1_enabled = 0;
+
 
     if (mraa_file_exist("/sys/class/spidev/spidev1.0"))
         spi0_enabled = 1;
@@ -1393,7 +1394,7 @@ mraa_beaglebone()
     b->i2c_bus[0].sda = 46 + 18;
     b->i2c_bus[0].scl = 46 + 17;
 
-    b->i2c_bus[1].bus_id = 1;
+    b->i2c_bus[1].bus_id = 2;
     b->i2c_bus[1].sda = 46 + 20;
     b->i2c_bus[1].scl = 46 + 19;
 

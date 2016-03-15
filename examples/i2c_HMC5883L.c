@@ -85,7 +85,7 @@ main(int argc, char** argv)
 
     //! [Interesting]
     mraa_i2c_context i2c;
-    i2c = mraa_i2c_init(0);
+    i2c = mraa_i2c_init(1);
 
     mraa_i2c_address(i2c, HMC5883L_I2C_ADDR);
     rx_tx_buf[0] = HMC5883L_CONF_REG_B;

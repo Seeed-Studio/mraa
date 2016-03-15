@@ -26,7 +26,7 @@ import mraa
 import sys
 
 sys.stdout.write("Initializing UART...")
-u=mraa.Uart(0)
+u=mraa.Uart(3)
 print("...done")
 
 print("Setting UART parameters: baudrate 115200, 8N1, no flow control")

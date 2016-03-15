@@ -25,7 +25,7 @@
 import mraa
 
 # Initialize UART
-u=mraa.Uart(0)
+u=mraa.Uart(1)
 
 # Set UART parameters
 u.setBaudRate(115200)
@@ -37,8 +37,6 @@ u.setFlowcontrol(False, False)
 while True:
   if u.dataAvailable():
     # We are doing 1-byte reads here
-    data_byte = u.readStr(1)
+    data_byte = u.readStr(100)
     print(data_byte)
     # Just a two-way half-duplex communication example, "X" is a flag
-    if data_byte == "X":
-      u.writeStr("Yes, master!")
