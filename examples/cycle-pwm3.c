@@ -32,7 +32,7 @@ main()
     mraa_init();
     //! [Interesting]
     mraa_pwm_context pwm;
-    pwm = mraa_pwm_init(3);
+    pwm = mraa_pwm_init(62);
     if (pwm == NULL) {
         return 1;
     }

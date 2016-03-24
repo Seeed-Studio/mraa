@@ -235,14 +235,14 @@ mraa_beaglebone_aio_init_pre(unsigned int aio)
 
 		while(timeout--) {
 			if (mraa_file_exist(devpath)) {
-                syslog(LOG_ERR, "ain:[devpath] %s", devpath);
 				syslog(LOG_ERR, "ain: Device init O.K!");
 	    	    return MRAA_SUCCESS;
 			} else {
+				syslog(LOG_ERR, "ain: sleep(1)");
                 sleep(1);
             }
 		}
-        syslog(LOG_ERR, "ain: Device not initialized");
+        syslog(LOG_ERR, "ain: Device not initialized!");
     }
     else {
 		ret = MRAA_SUCCESS;
@@ -277,12 +277,15 @@ mraa_beaglebone_uart_init_pre(int index)
 				 UART_OVERLAY(index + 1));
         }
         fclose(fh);
+		
 		while(timeout--) {
 			if (mraa_file_exist(devpath)) {
 				syslog(LOG_ERR, "uart: Device init O.K!");
 	    	    return MRAA_SUCCESS;
 			}
-			sleep(1);
+			else {
+				sleep(1);
+			}			
 		}
         syslog(LOG_ERR, "uart: Device not initialized");
     }
@@ -425,6 +428,15 @@ mraa_beaglebone_pwm_init_replace(int pin)
                    "pwm: Failed to write to CapeManager, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
         }
         fclose(fh);
+
+		while(timeout--){
+			if (mraa_file_exist(SYSFS_CLASS_PWM "pwmchip0")) {
+				syslog(LOG_ERR, "pwm: pwmchip init O.K!");
+		    } else {
+				sleep(1);
+			}
+			
+		}
     }
 
     //sprintf(devpath, SYSFS_CLASS_PWM "pwm%u", plat->pins[pin].pwm.pinmap);  // lambor
@@ -452,9 +464,12 @@ mraa_beaglebone_pwm_init_replace(int pin)
 	        dev->chipid = 0;
 	        dev->pin = plat->pins[pin].pwm.pinmap;
 	        dev->period = -1;
+			syslog(LOG_ERR, "pwm: export success!");
 	        return dev;
-	    }
-		sleep(1);
+	    } else {
+			sleep(1);
+		}
+		
 	}
 	syslog(LOG_ERR, "pwm: pin not initialized, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
     return NULL;
