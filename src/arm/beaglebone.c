@@ -244,7 +244,7 @@ mraa_beaglebone_aio_init_pre(unsigned int aio)
     else {
 		ret = MRAA_SUCCESS;
 	}
-    return ret;
+    return ret; 
 }
 
 mraa_result_t
@@ -255,7 +255,7 @@ mraa_beaglebone_uart_init_pre(int index)
     char overlay[MAX_SIZE];
     char* capepath = NULL;
 	int timeout = 5;
-    sprintf(devpath, "/dev/ttyO%u", index + 1);
+    sprintf(devpath, "/dev/ttyO%u", index);
     if (!mraa_file_exist(devpath)) {
         capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
         if (capepath == NULL) {
@@ -269,9 +269,9 @@ mraa_beaglebone_uart_init_pre(int index)
             syslog(LOG_ERR, "uart: Failed to open capepath for writing, check access rights for user");
             return ret;
         }
-        if (fprintf(fh, UART_OVERLAY"%d", index + 1) < 0) {
+        if (fprintf(fh, UART_OVERLAY"%d", index) < 0) {
             syslog(LOG_ERR, "uart: Failed to write to CapeManager, check that /lib/firmware/%s%d exists",
-				 UART_OVERLAY, index + 1);
+				 UART_OVERLAY, index);
         }
         fclose(fh);
 
@@ -1597,25 +1597,29 @@ mraa_beaglebone()
     b->spi_bus[1].miso = 46 + 30;
     b->spi_bus[1].sclk = 46 + 31;
 
-    b->uart_dev_count = 5;
+    b->uart_dev_count = 6;
     b->def_uart_dev = 0;
-    b->uart_dev[0].rx = 46 + 26;
-    b->uart_dev[0].tx = 46 + 24;
-	b->uart_dev[0].device_path = "/dev/ttyO1";
-    b->uart_dev[1].rx = 46 + 22;
-    b->uart_dev[1].tx = 46 + 21;
-	b->uart_dev[1].device_path = "/dev/ttyO2";
+	b->uart_dev[0].device_path = "/dev/ttyO0";
+	
+    b->uart_dev[1].rx = 46 + 26;
+    b->uart_dev[1].tx = 46 + 24;
+	b->uart_dev[1].device_path = "/dev/ttyO1";
+	
+    b->uart_dev[2].rx = 46 + 22;
+    b->uart_dev[2].tx = 46 + 21;	
+	b->uart_dev[2].device_path = "/dev/ttyO2";
     // TODO
-    b->uart_dev[2].rx = 0;
-    b->uart_dev[2].tx = 42;
-	b->uart_dev[2].device_path = "/dev/ttyO3";
-
-    b->uart_dev[3].rx = 46 + 11;
-    b->uart_dev[3].tx = 46 + 13;
-	b->uart_dev[3].device_path = "/dev/ttyO4";
-    b->uart_dev[4].rx = 38;
-    b->uart_dev[4].tx = 37;
-	b->uart_dev[4].device_path = "/dev/ttyO5";
+    //b->uart_dev[3].rx = 0;
+    //b->uart_dev[3].tx = 42;
+	b->uart_dev[3].device_path = "/dev/ttyO3";
+	
+    b->uart_dev[4].rx = 46 + 11;
+    b->uart_dev[4].tx = 46 + 13;
+	b->uart_dev[4].device_path = "/dev/ttyO4";
+	
+    //b->uart_dev[5].rx = 38;
+    //b->uart_dev[5].tx = 37;
+	b->uart_dev[5].device_path = "/dev/ttyO5";
 
     b->gpio_count = 0;
     int i;
