@@ -33,8 +33,11 @@ main()
     uint16_t adc_value = 0;
     float adc_value_float = 0.0;
 
-    adc_a0 = mraa_aio_init(0);
+	fprintf(stdout, "Start Analog Read!\n");
+	
+    adc_a0 = mraa_aio_init(1);
     if (adc_a0 == NULL) {
+		fprintf(stdout, "Init erro!!\n");
         return 1;
     }
 

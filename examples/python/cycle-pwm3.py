@@ -25,7 +25,7 @@
 import mraa
 import time
 
-x = mraa.Pwm(3)
+x = mraa.Pwm(62)
 x.period_us(700)
 x.enable(True)
 value= 0.0

@@ -25,7 +25,8 @@
 import mraa
 import time
 
-x = mraa.Gpio(8)
+# Using BBG GPIO_51
+x = mraa.Gpio(62)
 x.dir(mraa.DIR_OUT)
 
 while True:

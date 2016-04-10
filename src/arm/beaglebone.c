@@ -31,19 +31,22 @@
 #include "common.h"
 #include "arm/beaglebone.h"
 
-#define NUM2STR(x) #x
+#define DT_BASE "/sys/firmware/devicetree/base"
 
-#define PLATFORM_NAME_BEAGLEBONE_BLACK_REV_B "Beaglebone Black Rev. B"
-#define PLATFORM_NAME_BEAGLEBONE_BLACK_REV_C "Beaglebone Black Rev. C"
+#define PLATFORM_NAME_BEAGLEBONE_BLACK "Beaglebone Black"
+#define PLATFORM_NAME_BEAGLEBONE_GREEN "Beaglebone Green"
+#define PLATFORM_NAME_BEAGLEBONE_GREEN_WIRELESS "Beaglebone Green Wireless"
+#define PLATFORM_NAME_BEAGLEBONE_ENHANCED "Beaglebone Enhanced"
 
-#define SYSFS_DEVICES_CAPEMGR_SLOTS "/sys/devices/bone_capemgr.*/slots"
+
+#define SYSFS_DEVICES_CAPEMGR_SLOTS "/sys/devices/platform/bone_capemgr/slots"
 #define SYSFS_CLASS_PWM "/sys/class/pwm/"
 #define SYSFS_CLASS_MMC "/sys/class/mmc_host/"
-#define SYSFS_PWM_OVERLAY "am33xx_pwm"
-#define UART_OVERLAY(x) "ADAFRUIT-UART" NUM2STR(x)
-//#define ADAFRUIT_SPI_OVERLAY "ADAFRUIT-SPI%d"
-#define SPI_OVERLAY(x) "BB-SPI" NUM2STR(x) "-01"
-#define I2C_OVERLAY(x) "ADAFRUIT-I2C" NUM2STR(x)
+#define SYSFS_PWM_OVERLAY "BB-PWM"
+#define AIN_OVERLAY "BB-ADC"
+#define UART_OVERLAY "BB-UART"
+#define SPI_OVERLAY "BB-SPIDEV"
+#define I2C_OVERLAY "BB-I2C"
 #define MAX_SIZE 64
 
 #define MMAP_PATH "/dev/mem"
@@ -181,13 +184,78 @@ mraa_beaglebone_mmap_setup(mraa_gpio_context dev, mraa_boolean_t en)
 }
 
 mraa_result_t
+mraa_beaglebone_aio_get_fp(mraa_aio_context dev)
+{
+    char file_path[64] = "";
+
+    snprintf(file_path, 64, "/sys/bus/iio/devices/iio:device0/in_voltage%d_raw", dev->channel);
+
+    dev->adc_in_fp = open(file_path, O_RDONLY);
+    if (dev->adc_in_fp == -1) {
+        syslog(LOG_ERR, "beaglebone: Failed to open Analog input raw file %s for "
+                        "reading!",
+               file_path);
+        return MRAA_ERROR_INVALID_RESOURCE;
+    }
+
+    return MRAA_SUCCESS;
+}
+
+mraa_result_t
+mraa_beaglebone_aio_init_pre(unsigned int aio)
+{
+    mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
+    char devpath[MAX_SIZE];
+    char overlay[MAX_SIZE];
+    char* capepath = NULL;
+	int timeout = 5;
+
+    sprintf(devpath, "/sys/bus/iio/devices/iio:device0/in_voltage%d_raw", aio);
+    if (!mraa_file_exist(devpath)) {
+        capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
+        if (capepath == NULL) {
+            syslog(LOG_ERR, "ain: Could not find CapeManager");
+            return ret;
+        }
+        FILE* fh;
+        fh = fopen(capepath, "w");
+        free(capepath);
+        if (fh == NULL) {
+            syslog(LOG_ERR, "ain: Failed to open capepath for writing, check access rights for user");
+            return ret;
+        }
+        if (fprintf(fh, AIN_OVERLAY) < 0) {
+            syslog(LOG_ERR, "ain: Failed to write to CapeManager");
+        }
+
+		fclose(fh);
+
+		while(timeout--) {
+			if (mraa_file_exist(devpath)) {
+				syslog(LOG_ERR, "ain: Device init O.K!");
+	    	    return MRAA_SUCCESS;
+			} else {
+				syslog(LOG_ERR, "ain: sleep(1)");
+                sleep(1);
+            }
+		}
+        syslog(LOG_ERR, "ain: Device not initialized!");
+    }
+    else {
+		ret = MRAA_SUCCESS;
+	}
+    return ret; 
+}
+
+mraa_result_t
 mraa_beaglebone_uart_init_pre(int index)
 {
     mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
     char devpath[MAX_SIZE];
     char overlay[MAX_SIZE];
     char* capepath = NULL;
-    sprintf(devpath, "/dev/ttyO%u", index + 1);
+	int timeout = 5;
+    sprintf(devpath, "/dev/ttyO%u", index);
     if (!mraa_file_exist(devpath)) {
         capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
         if (capepath == NULL) {
@@ -201,15 +269,27 @@ mraa_beaglebone_uart_init_pre(int index)
             syslog(LOG_ERR, "uart: Failed to open capepath for writing, check access rights for user");
             return ret;
         }
-        if (fprintf(fh, UART_OVERLAY(index + 1)) < 0) {
-            syslog(LOG_ERR, "uart: Failed to write to CapeManager");
+        if (fprintf(fh, UART_OVERLAY"%d", index) < 0) {
+            syslog(LOG_ERR, "uart: Failed to write to CapeManager, check that /lib/firmware/%s%d exists",
+				 UART_OVERLAY, index);
         }
         fclose(fh);
-    }
-    if (mraa_file_exist(devpath))
-        ret = MRAA_SUCCESS;
-    else
+
+		while(timeout--) {
+			if (mraa_file_exist(devpath)) {
+				syslog(LOG_ERR, "uart: Device init O.K!");
+	    	    return MRAA_SUCCESS;
+			}
+			else {
+				sleep(1);
+			}
+		}
         syslog(LOG_ERR, "uart: Device not initialized");
+    }
+    else {
+		ret = MRAA_SUCCESS;
+	}
+
     return ret;
 }
 
@@ -221,7 +301,8 @@ mraa_beaglebone_spi_init_pre(int index)
     char overlay[MAX_SIZE];
     char* capepath = NULL;
     int deviceindex = 0;
-
+	int timeout = 5;
+	
     // The first initialized SPI devices always gets the bus id 1
     // So we need to track down correct mapping and adjust the bus_id field
     if ((index == 0) && mraa_link_targets("/sys/class/spidev/spidev1.0", "48030000"))
@@ -251,18 +332,28 @@ mraa_beaglebone_spi_init_pre(int index)
             syslog(LOG_ERR, "spi: Failed to open capepath for writing, check access rights for user");
             return ret;
         }
-        if (fprintf(fh, SPI_OVERLAY(index)) < 0) {
+        if (fprintf(fh, SPI_OVERLAY"%d", index) < 0) {
             syslog(LOG_ERR,
-                   "spi: Failed to write to CapeManager, check that /lib/firmware/%s exists",
-                   SPI_OVERLAY(index));
+                   "spi: Failed to write to CapeManager, check that /lib/firmware/%s%d exists",
+                   SPI_OVERLAY, index);
         }
         fclose(fh);
+		while(timeout--) {
+			if (mraa_file_exist(devpath)) {
+				syslog(LOG_ERR, "spi: Device init O.K!");
+	    	    return MRAA_SUCCESS;
+			}
+			else {
+				sleep(1);
+			}
+		}
+		
     }
     if (mraa_file_exist(devpath)) {
         plat->spi_bus[index].bus_id = deviceindex;
         ret = MRAA_SUCCESS;
     } else {
-        syslog(LOG_ERR, "spi: Device not initialized, check that /lib/firmware/%s exists", SPI_OVERLAY(index));
+        syslog(LOG_ERR, "spi: Device not initialized, check that /lib/firmware/%s%d exists", SPI_OVERLAY, index);
         syslog(LOG_ERR, "spi: Check http://elinux.org/BeagleBone_Black_Enable_SPIDEV for details");
     }
     return ret;
@@ -291,8 +382,8 @@ mraa_beaglebone_i2c_init_pre(unsigned int bus)
         }
         if (fprintf(fh, "ADAFRUIT-I2C%d", bus) < 0) {
             syslog(LOG_ERR,
-                   "i2c: Failed to write to CapeManager, check that /lib/firmware/%s exists",
-                   I2C_OVERLAY(index));
+                   "i2c: Failed to write to CapeManager, check that /lib/firmware/%s%d exists",
+                   I2C_OVERLAY, index);
         }
         fclose(fh);
     }
@@ -300,19 +391,47 @@ mraa_beaglebone_i2c_init_pre(unsigned int bus)
         ret = MRAA_SUCCESS;
     else {
         syslog(LOG_ERR,
-               "i2c: Device not initialized, check that /lib/firmware/%s exists",
-               I2C_OVERLAY(index));
+               "i2c: Device not initialized, check that /lib/firmware/%s%d exists",
+               I2C_OVERLAY, index);
     }
     return ret;
 }
 
+char* ReadFile(const char *filename)
+{
+	char *buffer = NULL;
+	int string_size,read_size;
+	FILE *fp = fopen(filename,"r");
+	if(fp == NULL) {
+		syslog(LOG_ERR,"ReadFile: Err!\r\n");
+	}
+	if (fp) {
+		//syslog(LOG_ERR,"ReadFile: fp is not NULL\r\n");
+		fseek(fp, 0, SEEK_END);            
+		string_size = ftell (fp);
+		//syslog(LOG_ERR,"ReadFile: string_size1: %d\r\n", string_size);
+		rewind(fp);
+		buffer = (char*) malloc (sizeof(char) * (string_size + 1) );
+		read_size = fread(buffer,sizeof(char),string_size,fp);               
+		buffer[string_size] = '\0';
+	}
+	return buffer;
+}
+
+
 mraa_pwm_context
 mraa_beaglebone_pwm_init_replace(int pin)
-{
+{	
     char devpath[MAX_SIZE];
     char overlay[MAX_SIZE];
     char* capepath = NULL;
-    if (plat == NULL) {
+	char pwmchip_path[MAX_SIZE];
+	char* s = NULL;
+	int timeout = 5; 
+	int PWM_CHIPID[3] = {-1,-1,-1}; 
+	unsigned char BB_PWM;  // PWM device that the input pin belongs to. 
+
+	if (plat == NULL) {
         syslog(LOG_ERR, "pwm: Platform Not Initialised");
         return NULL;
     }
@@ -320,7 +439,43 @@ mraa_beaglebone_pwm_init_replace(int pin)
         syslog(LOG_ERR, "pwm: pin not capable of pwm");
         return NULL;
     }
-    if (!mraa_file_exist(SYSFS_CLASS_PWM "pwmchip0")) {
+
+	pin == 68 ? BB_PWM = 0 : -1; 
+	pin == 67 ? BB_PWM = 0 : -1; 
+	pin == 60 ? BB_PWM = 1 : -1; 
+	pin == 62 ? BB_PWM = 1 : -1; 
+	pin == 19 ? BB_PWM = 2 : -1; 
+	pin == 13 ? BB_PWM = 2 : -1;
+	
+	char *buffer = ReadFile(SYSFS_DEVICES_CAPEMGR_SLOTS);		 	
+	if (buffer) { 
+		int chipid = 0;   
+		unsigned char bb_pwm; 
+		//puts(string); 
+		if(s = strstr(buffer, "PWM")) { 
+			s = buffer;                       
+			while(*s != '\0') { 
+				if(*(s) == 'P' && *(++s) == 'W' && *(++s) == 'M') { 
+					bb_pwm = (unsigned char)(*(++s) - '0');
+					PWM_CHIPID[bb_pwm] = chipid;
+					chipid += 2;
+				}
+				s++;
+			} 
+		} 
+		if(PWM_CHIPID[BB_PWM] != -1) {
+			syslog(LOG_ERR,"pwm: PWM%u has registered at pwmchip%u !\r\n", BB_PWM, PWM_CHIPID[BB_PWM]);
+		}
+		else {
+			PWM_CHIPID[BB_PWM] = chipid;
+			syslog(LOG_ERR,"pwm: PWM%u going to register at pwmchip%u!\r\n", BB_PWM, chipid);
+		}
+		free(buffer);
+	}	    
+
+	sprintf(pwmchip_path, SYSFS_CLASS_PWM "pwmchip%d", PWM_CHIPID[BB_PWM]);
+	//printf("%s\r\n", pwmchip_path);
+    if (!mraa_file_exist(pwmchip_path)) {
         FILE* fh;
         capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
         if (capepath == NULL) {
@@ -333,17 +488,29 @@ mraa_beaglebone_pwm_init_replace(int pin)
             syslog(LOG_ERR, "pwm: Failed to open %s for writing, check access rights for user");
             return NULL;
         }
-        if (fprintf(fh, SYSFS_PWM_OVERLAY) < 0) {
+        if (fprintf(fh, "BB-PWM%d", BB_PWM) < 0) {
             syslog(LOG_ERR,
-                   "pwm: Failed to write to CapeManager, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
+                   "pwm: Failed to write to CapeManager, check that /lib/firmware/%s%d exists", SYSFS_PWM_OVERLAY, PWM_CHIPID[BB_PWM]);
         }
         fclose(fh);
+
+		while(timeout--){
+			if (mraa_file_exist(pwmchip_path)) {
+				syslog(LOG_ERR, "pwm: pwmchip init O.K!");
+				break;
+		    } else {
+				sleep(1);
+			}
+		}
     }
 
-    sprintf(devpath, SYSFS_CLASS_PWM "pwm%u", plat->pins[pin].pwm.pinmap);
+    sprintf(devpath, "%s/pwm%u", pwmchip_path, plat->pins[pin].pwm.pinmap);
     if (!mraa_file_exist(devpath)) {
         FILE* fh;
-        fh = fopen(SYSFS_CLASS_PWM "export", "w");
+		char export_path[MAX_SIZE];
+		
+		sprintf(export_path,"%s/export", pwmchip_path );
+        fh = fopen(export_path, "w");
         if (fh == NULL) {
             syslog(LOG_ERR, "pwm: Failed to open /sys/class/pwm/export for writing, check access "
                             "rights for user");
@@ -355,17 +522,23 @@ mraa_beaglebone_pwm_init_replace(int pin)
         fclose(fh);
     }
 
-    if (mraa_file_exist(devpath)) {
-        mraa_pwm_context dev = (mraa_pwm_context) calloc(1, sizeof(struct _pwm));
-        if (dev == NULL)
-            return NULL;
-        dev->duty_fp = -1;
-        dev->chipid = -1;
-        dev->pin = plat->pins[pin].pwm.pinmap;
-        dev->period = -1;
-        return dev;
-    } else
-        syslog(LOG_ERR, "pwm: pin not initialized, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
+	while(timeout--){
+		if (mraa_file_exist(devpath)) {
+	        mraa_pwm_context dev = (mraa_pwm_context) calloc(1, sizeof(struct _pwm));
+	        if (dev == NULL)
+	            return NULL;
+	        dev->duty_fp = -1;
+	        dev->chipid = PWM_CHIPID[BB_PWM];
+	        dev->pin = plat->pins[pin].pwm.pinmap;
+	        dev->period = -1;
+			syslog(LOG_ERR, "pwm: export success!");
+	        return dev;
+	    } else {
+			sleep(1);
+		}
+
+	}
+	syslog(LOG_ERR, "pwm: pin not initialized, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
     return NULL;
 }
 
@@ -390,22 +563,22 @@ mraa_beaglebone()
     unsigned int ehrpwm2a_enabled = 0;
     unsigned int ehrpwm2b_enabled = 0;
     unsigned int is_rev_c = 0;
-    size_t len = 0;
-    char* line = NULL;
 
-    FILE* fh;
-    fh = fopen(SYSFS_CLASS_MMC "mmc1/mmc1:0001/name", "r");
-    if (fh != NULL) {
-        emmc_enabled = 1;
-        if (getline(&line, &len, fh) != -1) {
-            if (strstr(line, "MMC04G")) {
-                is_rev_c = 1;
-            }
-        }
-        fclose(fh);
-        free(line);
-    } else
-        emmc_enabled = 0;
+	if (mraa_file_exist(SYSFS_CLASS_MMC "mmc1/mmc1:0001/name")) {
+			 emmc_enabled = 1;
+		}
+	if (mraa_file_exist(DT_BASE "/model")) {
+		 // We are on a modern kernel, great!!!!
+		 if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green")) {
+		 		is_rev_c = 3;
+		 } else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green Wireless")) {
+		 		is_rev_c = 2;
+	 	}else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Black")) {
+		 		is_rev_c = 1;
+	 	}else if (mraa_file_contains(DT_BASE "/model", "SanCloud BeagleBone Enhanced")) {
+		 		is_rev_c = 0;
+	 	}
+	}
 
 
     if (mraa_file_exist("/sys/devices/ocp.*/hdmi.*"))
@@ -413,15 +586,16 @@ mraa_beaglebone()
     else
         hdmi_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/i2c-dev/i2c-0"))
+    if (mraa_file_exist("/dev/i2c-0"))
         i2c0_enabled = 1;
     else
         i2c0_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/i2c-dev/i2c-1"))
+    if (mraa_file_exist("/dev/i2c-2"))
         i2c1_enabled = 1;
     else
         i2c1_enabled = 0;
+
 
     if (mraa_file_exist("/sys/class/spidev/spidev1.0"))
         spi0_enabled = 1;
@@ -433,31 +607,31 @@ mraa_beaglebone()
     else
         spi1_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO1"))
+    if (mraa_file_exist("/dev/ttyO1"))
         uart1_enabled = 1;
     else
         uart1_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO2"))
+    if (mraa_file_exist("/dev/ttyO2"))
         uart2_enabled = 1;
     else
         uart2_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO3"))
+    if (mraa_file_exist("/dev/ttyO3"))
         uart3_enabled = 1;
     else
         uart3_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO4"))
+    if (mraa_file_exist("/dev/ttyO4"))
         uart4_enabled = 1;
     else
         uart4_enabled = 0;
 
-    if (mraa_file_exist("/sys/class/tty/ttyO5"))
+    if (mraa_file_exist("/dev/ttyO5"))
         uart5_enabled = 1;
     else
         uart5_enabled = 0;
-
+/*
     if (mraa_file_exist("/sys/class/pwm/pwm0"))
         ehrpwm0a_enabled = 1;
     else
@@ -487,19 +661,27 @@ mraa_beaglebone()
         ehrpwm2b_enabled = 1;
     else
         ehrpwm2b_enabled = 0;
-
+*/
     mraa_board_t* b = (mraa_board_t*) calloc(1, sizeof(mraa_board_t));
     if (b == NULL)
         return NULL;
-    // TODO: Detect Beaglebone Black Revisions, for now always TYPE B
     if (is_rev_c == 0) {
-        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK_REV_B;
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_ENHANCED;
         b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
     }
     if (is_rev_c == 1) {
-        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK_REV_C;
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_BLACK;
         b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
     }
+    if (is_rev_c == 2) {
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_GREEN_WIRELESS;
+        b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
+    }
+    if (is_rev_c == 3) {
+        b->platform_name = PLATFORM_NAME_BEAGLEBONE_GREEN;
+        b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
+    }
+
 
     if (b->platform_name == NULL) {
         goto error;
@@ -523,6 +705,9 @@ mraa_beaglebone()
         goto error;
     }
 
+
+    b->adv_func->aio_get_valid_fp = &mraa_beaglebone_aio_get_fp;
+    b->adv_func->aio_init_pre = &mraa_beaglebone_aio_init_pre;
     b->adv_func->uart_init_pre = &mraa_beaglebone_uart_init_pre;
     b->adv_func->spi_init_pre = &mraa_beaglebone_spi_init_pre;
     b->adv_func->i2c_init_pre = &mraa_beaglebone_i2c_init_pre;
@@ -631,7 +816,7 @@ mraa_beaglebone()
     b->pins[13].gpio.pinmap = 23;
     b->pins[13].gpio.parent_id = 0;
     b->pins[13].gpio.mux_total = 0;
-    b->pins[13].pwm.pinmap = 6;
+    b->pins[13].pwm.pinmap = 1;
     b->pins[13].pwm.mux_total = 0;
 
     strncpy(b->pins[14].name, "GPIO26", MRAA_PIN_NAME_SIZE);
@@ -675,7 +860,7 @@ mraa_beaglebone()
     b->pins[19].gpio.pinmap = 22;
     b->pins[19].gpio.parent_id = 0;
     b->pins[19].gpio.mux_total = 0;
-    b->pins[19].pwm.pinmap = 5;
+    b->pins[19].pwm.pinmap = 0;
     b->pins[19].pwm.mux_total = 0;
 
     if (emmc_enabled == 1) {
@@ -1002,29 +1187,38 @@ mraa_beaglebone()
     strncpy(b->pins[48].name, "GND", MRAA_PIN_NAME_SIZE);
     b->pins[48].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
 
+	b->pins[49].aio.pinmap = 0;  // AIN0
+	b->pins[50].aio.pinmap = 1;  // AIN1
+	b->pins[51].aio.pinmap = 2;  // AIN2
+	b->pins[52].aio.pinmap = 3;  // AIN3
+	b->pins[53].aio.pinmap = 4;  // AIN4
+	b->pins[54].aio.pinmap = 5;  // AIN5
+	b->pins[55].aio.pinmap = 6;  // AIN6
+
+	/* pin49~55 has unusually added capabilites.aio=1 */
     strncpy(b->pins[49].name, "3.3V", MRAA_PIN_NAME_SIZE);
-    b->pins[49].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[49].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[50].name, "3.3V", MRAA_PIN_NAME_SIZE);
-    b->pins[50].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[50].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
-    strncpy(b->pins[51].name, "5V", MRAA_PIN_NAME_SIZE);
-    b->pins[51].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+	strncpy(b->pins[51].name, "5V", MRAA_PIN_NAME_SIZE);
+    b->pins[51].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[52].name, "5V", MRAA_PIN_NAME_SIZE);
-    b->pins[52].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[52].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[53].name, "5V", MRAA_PIN_NAME_SIZE);
-    b->pins[53].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[53].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[54].name, "5V", MRAA_PIN_NAME_SIZE);
-    b->pins[54].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[54].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[55].name, "PWR", MRAA_PIN_NAME_SIZE);
-    b->pins[55].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[55].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     strncpy(b->pins[56].name, "RESET", MRAA_PIN_NAME_SIZE);
-    b->pins[56].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+    b->pins[56].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
 
     if (uart4_enabled == 1) {
         strncpy(b->pins[57].name, "UART4_RX", MRAA_PIN_NAME_SIZE);
@@ -1066,7 +1260,7 @@ mraa_beaglebone()
     b->pins[60].gpio.pinmap = 50;
     b->pins[60].gpio.parent_id = 0;
     b->pins[60].gpio.mux_total = 0;
-    b->pins[60].pwm.pinmap = 3;
+    b->pins[60].pwm.pinmap = 0;
     b->pins[60].pwm.mux_total = 0;
 
     // TODO PWM_TRIP2_IN (not a PWM output, but used for sync cf ref. manual)
@@ -1086,7 +1280,7 @@ mraa_beaglebone()
     b->pins[62].gpio.pinmap = 51;
     b->pins[62].gpio.parent_id = 0;
     b->pins[62].gpio.mux_total = 0;
-    b->pins[62].pwm.pinmap = 4;
+    b->pins[62].pwm.pinmap = 1;
     b->pins[62].pwm.mux_total = 0;
 
     if ((i2c0_enabled == 1) || (spi0_enabled == 1)) {
@@ -1380,7 +1574,7 @@ mraa_beaglebone()
     b->i2c_bus[0].sda = 46 + 18;
     b->i2c_bus[0].scl = 46 + 17;
 
-    b->i2c_bus[1].bus_id = 1;
+    b->i2c_bus[1].bus_id = 2;
     b->i2c_bus[1].sda = 46 + 20;
     b->i2c_bus[1].scl = 46 + 19;
 
@@ -1403,26 +1597,35 @@ mraa_beaglebone()
     b->spi_bus[1].miso = 46 + 30;
     b->spi_bus[1].sclk = 46 + 31;
 
-    b->uart_dev_count = 5;
+    b->uart_dev_count = 6;
     b->def_uart_dev = 0;
-    b->uart_dev[0].rx = 46 + 26;
-    b->uart_dev[0].tx = 46 + 24;
-    b->uart_dev[1].rx = 46 + 22;
-    b->uart_dev[1].tx = 46 + 21;
+	b->uart_dev[0].device_path = "/dev/ttyO0";
+	
+    b->uart_dev[1].rx = 46 + 26;
+    b->uart_dev[1].tx = 46 + 24;
+	b->uart_dev[1].device_path = "/dev/ttyO1";
+	
+    b->uart_dev[2].rx = 46 + 22;
+    b->uart_dev[2].tx = 46 + 21;	
+	b->uart_dev[2].device_path = "/dev/ttyO2";
     // TODO
-    b->uart_dev[2].rx = 0;
-    b->uart_dev[2].tx = 42;
-
-    b->uart_dev[3].rx = 46 + 11;
-    b->uart_dev[3].tx = 46 + 13;
-    b->uart_dev[4].rx = 38;
-    b->uart_dev[4].tx = 37;
+    //b->uart_dev[3].rx = 0;
+    //b->uart_dev[3].tx = 42;
+	b->uart_dev[3].device_path = "/dev/ttyO3";
+	
+    b->uart_dev[4].rx = 46 + 11;
+    b->uart_dev[4].tx = 46 + 13;
+	b->uart_dev[4].device_path = "/dev/ttyO4";
+	
+    //b->uart_dev[5].rx = 38;
+    //b->uart_dev[5].tx = 37;
+	b->uart_dev[5].device_path = "/dev/ttyO5";
 
     b->gpio_count = 0;
     int i;
     for (i = 0; i < b->phy_pin_count; i++)
         if (b->pins[i].capabilites.gpio)
-            b->gpio_count++;
+            b->gpio_count++;  // 49 Gpio
 
     return b;
 error:
