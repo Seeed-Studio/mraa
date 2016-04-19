@@ -1185,8 +1185,9 @@ mraa_beaglebone()
     b->pins[47].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
 
     strncpy(b->pins[48].name, "GND", MRAA_PIN_NAME_SIZE);
-    b->pins[48].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
-
+    b->pins[48].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
+/*
+	//Fake pinmap to let aio work
 	b->pins[49].aio.pinmap = 0;  // AIN0
 	b->pins[50].aio.pinmap = 1;  // AIN1
 	b->pins[51].aio.pinmap = 2;  // AIN2
@@ -1194,7 +1195,7 @@ mraa_beaglebone()
 	b->pins[53].aio.pinmap = 4;  // AIN4
 	b->pins[54].aio.pinmap = 5;  // AIN5
 	b->pins[55].aio.pinmap = 6;  // AIN6
-
+*/
 	/* pin49~55 has unusually added capabilites.aio=1 */
     strncpy(b->pins[49].name, "3.3V", MRAA_PIN_NAME_SIZE);
     b->pins[49].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
@@ -1294,7 +1295,7 @@ mraa_beaglebone()
         }
     } else {
         strncpy(b->pins[63].name, "GPIO4", MRAA_PIN_NAME_SIZE);
-        b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 1, 0, 0 };
+        b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
     b->pins[63].gpio.pinmap = 4;
     b->pins[63].gpio.parent_id = 0;
@@ -1313,7 +1314,7 @@ mraa_beaglebone()
         }
     } else {
         strncpy(b->pins[64].name, "GPIO5", MRAA_PIN_NAME_SIZE);
-        b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 1, 0, 0 };
+        b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
     b->pins[64].gpio.pinmap = 5;
     b->pins[64].gpio.parent_id = 0;
@@ -1502,7 +1503,7 @@ mraa_beaglebone()
         }
     } else {
         strncpy(b->pins[77].name, "MMC0_SD", MRAA_PIN_NAME_SIZE);
-        b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+        b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 };
     }
     b->pins[77].gpio.pinmap = 110;
     b->pins[77].gpio.parent_id = 0;
@@ -1625,8 +1626,7 @@ mraa_beaglebone()
     int i;
     for (i = 0; i < b->phy_pin_count; i++)
         if (b->pins[i].capabilites.gpio)
-            b->gpio_count++;  // 49 Gpio
-
+            b->gpio_count++;  // 48 Gpio
     return b;
 error:
     syslog(LOG_CRIT, "Beaglebone: failed to initialize");
