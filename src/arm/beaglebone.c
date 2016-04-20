@@ -1296,7 +1296,7 @@ mraa_beaglebone()
         strncpy(b->pins[63].name, "GPIO5", MRAA_PIN_NAME_SIZE);
         b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
-    b->pins[63].gpio.pinmap = 4;
+    b->pins[63].gpio.pinmap = 5;
     b->pins[63].gpio.parent_id = 0;
     b->pins[63].gpio.mux_total = 0;
     b->pins[63].i2c.mux_total = 0;
@@ -1315,7 +1315,7 @@ mraa_beaglebone()
         strncpy(b->pins[64].name, "GPIO4", MRAA_PIN_NAME_SIZE);
         b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
-    b->pins[64].gpio.pinmap = 5;
+    b->pins[64].gpio.pinmap = 4;
     b->pins[64].gpio.parent_id = 0;
     b->pins[64].gpio.mux_total = 0;
     b->pins[64].i2c.mux_total = 0;
