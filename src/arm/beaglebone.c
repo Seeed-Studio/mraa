@@ -549,6 +549,7 @@ mraa_beaglebone()
     unsigned int hdmi_enabled = 1;
     unsigned int i2c0_enabled = 1;
     unsigned int i2c1_enabled = 1;
+    unsigned int i2c2_enabled = 1;
     unsigned int spi0_enabled = 0;
     unsigned int spi1_enabled = 0;
     unsigned int uart1_enabled = 0;
@@ -591,11 +592,15 @@ mraa_beaglebone()
     else
         i2c0_enabled = 0;
 
-    if (mraa_file_exist("/dev/i2c-2"))
+    if (mraa_file_exist("/dev/i2c-1"))
         i2c1_enabled = 1;
     else
         i2c1_enabled = 0;
-
+    
+    if (mraa_file_exist("/dev/i2c-2"))
+        i2c2_enabled = 1;
+    else
+        i2c2_enabled = 0;    
 
     if (mraa_file_exist("/sys/class/spidev/spidev1.0"))
         spi0_enabled = 1;
@@ -636,27 +641,22 @@ mraa_beaglebone()
         ehrpwm0a_enabled = 1;
     else
         ehrpwm0a_enabled = 0;
-
     if (mraa_file_exist("/sys/class/pwm/pwm1"))
         ehrpwm0b_enabled = 1;
     else
         ehrpwm0b_enabled = 0;
-
     if (mraa_file_exist("/sys/class/pwm/pwm3"))
         ehrpwm1a_enabled = 1;
     else
         ehrpwm1a_enabled = 0;
-
     if (mraa_file_exist("/sys/class/pwm/pwm4"))
         ehrpwm1b_enabled = 1;
     else
         ehrpwm1b_enabled = 0;
-
     if (mraa_file_exist("/sys/class/pwm/pwm5"))
         ehrpwm2a_enabled = 1;
     else
         ehrpwm2a_enabled = 0;
-
     if (mraa_file_exist("/sys/class/pwm/pwm6"))
         ehrpwm2b_enabled = 1;
     else
@@ -1185,9 +1185,8 @@ mraa_beaglebone()
     b->pins[47].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
 
     strncpy(b->pins[48].name, "GND", MRAA_PIN_NAME_SIZE);
-    b->pins[48].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
-/*
-	//Fake pinmap to let aio work
+    b->pins[48].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+
 	b->pins[49].aio.pinmap = 0;  // AIN0
 	b->pins[50].aio.pinmap = 1;  // AIN1
 	b->pins[51].aio.pinmap = 2;  // AIN2
@@ -1195,7 +1194,7 @@ mraa_beaglebone()
 	b->pins[53].aio.pinmap = 4;  // AIN4
 	b->pins[54].aio.pinmap = 5;  // AIN5
 	b->pins[55].aio.pinmap = 6;  // AIN6
-*/
+
 	/* pin49~55 has unusually added capabilites.aio=1 */
     strncpy(b->pins[49].name, "3.3V", MRAA_PIN_NAME_SIZE);
     b->pins[49].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 };
@@ -1284,8 +1283,8 @@ mraa_beaglebone()
     b->pins[62].pwm.pinmap = 1;
     b->pins[62].pwm.mux_total = 0;
 
-    if ((i2c0_enabled == 1) || (spi0_enabled == 1)) {
-        if (i2c0_enabled == 1) {
+    if ((i2c1_enabled == 1) || (spi0_enabled == 1)) {
+        if (i2c1_enabled == 1) {
             strncpy(b->pins[63].name, "I2C1SCL", MRAA_PIN_NAME_SIZE);
             b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 1, 0, 0 };
         }
@@ -1294,7 +1293,7 @@ mraa_beaglebone()
             b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
         }
     } else {
-        strncpy(b->pins[63].name, "GPIO4", MRAA_PIN_NAME_SIZE);
+        strncpy(b->pins[63].name, "GPIO5", MRAA_PIN_NAME_SIZE);
         b->pins[63].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
     b->pins[63].gpio.pinmap = 4;
@@ -1302,9 +1301,9 @@ mraa_beaglebone()
     b->pins[63].gpio.mux_total = 0;
     b->pins[63].i2c.mux_total = 0;
     b->pins[63].spi.mux_total = 0;
-
-    if ((i2c0_enabled == 1) || (spi0_enabled == 1)) {
-        if (i2c0_enabled == 1) {
+    
+    if ((i2c1_enabled == 1) || (spi0_enabled == 1)) {
+        if (i2c1_enabled == 1) {
             strncpy(b->pins[64].name, "I2C1SDA", MRAA_PIN_NAME_SIZE);
             b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 1, 0, 0 };
         }
@@ -1313,7 +1312,7 @@ mraa_beaglebone()
             b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
         }
     } else {
-        strncpy(b->pins[64].name, "GPIO5", MRAA_PIN_NAME_SIZE);
+        strncpy(b->pins[64].name, "GPIO4", MRAA_PIN_NAME_SIZE);
         b->pins[64].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 };
     }
     b->pins[64].gpio.pinmap = 5;
@@ -1322,7 +1321,7 @@ mraa_beaglebone()
     b->pins[64].i2c.mux_total = 0;
     b->pins[64].spi.mux_total = 0;
 
-    if (i2c0_enabled == 1) {
+    if (i2c2_enabled == 1) {
         strncpy(b->pins[65].name, "I2C2SCL", MRAA_PIN_NAME_SIZE);
         b->pins[65].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 1, 0, 0 };
         b->pins[65].i2c.mux_total = 0;
@@ -1442,7 +1441,7 @@ mraa_beaglebone()
     b->pins[73].gpio.parent_id = 0;
     b->pins[73].gpio.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+//    if (emmc_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[74].name, "SPI1CS0", MRAA_PIN_NAME_SIZE);
             b->pins[74].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
@@ -1450,16 +1449,16 @@ mraa_beaglebone()
             strncpy(b->pins[74].name, "GPIO113", MRAA_PIN_NAME_SIZE);
             b->pins[74].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 0, 0, 0 };
         }
-    } else {
-        strncpy(b->pins[74].name, "MCASP0XX", MRAA_PIN_NAME_SIZE);
-        b->pins[74].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
-    }
+//    } else {
+//        strncpy(b->pins[74].name, "MCASP0XX", MRAA_PIN_NAME_SIZE);
+//        b->pins[74].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
+//    }
     b->pins[74].gpio.pinmap = 113;
     b->pins[74].gpio.parent_id = 0;
     b->pins[74].gpio.mux_total = 0;
     b->pins[74].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+//    if (emmc_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[75].name, "SPI1D0", MRAA_PIN_NAME_SIZE);
             b->pins[75].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
@@ -1467,16 +1466,16 @@ mraa_beaglebone()
             strncpy(b->pins[75].name, "GPIO111", MRAA_PIN_NAME_SIZE);
             b->pins[75].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 0, 0, 0 };
         }
-    } else {
-        strncpy(b->pins[75].name, "MMC1_SD", MRAA_PIN_NAME_SIZE);
-        b->pins[75].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
-    }
+//    } else {
+//        strncpy(b->pins[75].name, "MMC1_SD", MRAA_PIN_NAME_SIZE);
+//        b->pins[75].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+//    }
     b->pins[75].gpio.pinmap = 111;
     b->pins[75].gpio.parent_id = 0;
     b->pins[75].gpio.mux_total = 0;
     b->pins[75].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+//    if (emmc_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[76].name, "SPI1D1", MRAA_PIN_NAME_SIZE);
             b->pins[76].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
@@ -1484,16 +1483,16 @@ mraa_beaglebone()
             strncpy(b->pins[76].name, "GPIO112", MRAA_PIN_NAME_SIZE);
             b->pins[76].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 0, 0, 0 };
         }
-    } else {
-        strncpy(b->pins[76].name, "MMC2_SD", MRAA_PIN_NAME_SIZE);
-        b->pins[76].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
-    }
+//    } else {
+//        strncpy(b->pins[76].name, "MMC2_SD", MRAA_PIN_NAME_SIZE);
+//       b->pins[76].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+//    }
     b->pins[76].gpio.pinmap = 112;
     b->pins[76].gpio.parent_id = 0;
     b->pins[76].gpio.mux_total = 0;
     b->pins[76].spi.mux_total = 0;
 
-    if (emmc_enabled != 1) {
+//    if (emmc_enabled != 1) {
         if (spi1_enabled == 1) {
             strncpy(b->pins[77].name, "SPI1CLK", MRAA_PIN_NAME_SIZE);
             b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 1, 0, 0, 0 };
@@ -1501,10 +1500,10 @@ mraa_beaglebone()
             strncpy(b->pins[77].name, "GPIO110", MRAA_PIN_NAME_SIZE);
             b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 0, 0, 0 };
         }
-    } else {
-        strncpy(b->pins[77].name, "MMC0_SD", MRAA_PIN_NAME_SIZE);
-        b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 };
-    }
+//    } else {
+//        strncpy(b->pins[77].name, "MMC0_SD", MRAA_PIN_NAME_SIZE);
+//        b->pins[77].capabilites = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 };
+//    }
     b->pins[77].gpio.pinmap = 110;
     b->pins[77].gpio.parent_id = 0;
     b->pins[77].gpio.mux_total = 0;
@@ -1626,7 +1625,8 @@ mraa_beaglebone()
     int i;
     for (i = 0; i < b->phy_pin_count; i++)
         if (b->pins[i].capabilites.gpio)
-            b->gpio_count++;  // 48 Gpio
+            b->gpio_count++;  // 49 Gpio
+    b->gpio_count = 49;
     return b;
 error:
     syslog(LOG_CRIT, "Beaglebone: failed to initialize");
