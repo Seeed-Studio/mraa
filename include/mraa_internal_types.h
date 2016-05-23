@@ -1,7 +1,7 @@
 /*
  * Author: Thomas Ingleby <thomas.c.ingleby@intel.com>
  * Author: Brendan Le Foll <brendan.le.foll@intel.com>
- * Copyright (c) 2014 Intel Corporation.
+ * Copyright (c) 2014-2016 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
@@ -40,6 +40,17 @@
 #define MRAA_IO_SETUP_FAILURE -2
 #define MRAA_NO_SUCH_IO -1
 
+#ifdef FIRMATA
+struct _firmata {
+    /*@*/
+    uint8_t feature; /**< the feature */
+    uint8_t index;
+    void (* isr)(uint8_t*, int); /**< the feature response request */
+    mraa_boolean_t added; /**< boolean to set if responses already set in devs array */
+    /*@}*/
+};
+#endif
+
 /**
  * A structure representing a gpio pin.
  */
@@ -48,8 +59,8 @@ struct _gpio {
     int pin; /**< the pin number, as known to the os. */
     int phy_pin; /**< pin passed to clean init. -1 none and raw*/
     int value_fp; /**< the file pointer to the value of the gpio */
-    void (* isr)(void *); /**< the interupt service request */
-    void *isr_args; /**< args return when interupt service request triggered */
+    void (* isr)(void *); /**< the interrupt service request */
+    void *isr_args; /**< args return when interrupt service request triggered */
     pthread_t thread_id; /**< the isr handler thread id */
     int isr_value_fp; /**< the isr file pointer on the value */
 #ifndef HAVE_PTHREAD_CANCEL
@@ -137,9 +148,9 @@ struct _iio {
     char* name; /**< IIO device name */
     int fp; /**< IIO device in /dev */
     int fp_event;  /**<  event file descriptor for IIO device */
-    void (* isr)(char* data); /**< the interupt service request */
-    void *isr_args; /**< args return when interupt service request triggered */
-    void (* isr_event)(struct iio_event_data* data, void* args); /**< the event interupt service request */
+    void (* isr)(char* data); /**< the interrupt service request */
+    void *isr_args; /**< args return when interrupt service request triggered */
+    void (* isr_event)(struct iio_event_data* data, void* args); /**< the event interrupt service request */
     int chan_num;
     pthread_t thread_id; /**< the isr handler thread id */
     mraa_iio_channel* channels;
@@ -164,13 +175,31 @@ typedef struct {
     /*@}*/
 } mraa_pincapabilities_t;
 
+
+/**
+ *  Pin commands definition for mraa_mux_t struc
+ */
+
+typedef enum {
+    PINCMD_UNDEFINED = 0,       // do not modify, default command for zero value, used for backward compatibility with boards where pincmd is not defined (it will be deleted later)
+    PINCMD_SET_VALUE = 1,       // set a pin's value
+    PINCMD_SET_DIRECTION = 2,   // set a pin's direction (value like MRAA_GPIO_OUT, MRAA_GPIO_OUT_HIGH...)
+    PINCMD_SET_IN_VALUE = 3,    // set input direction and value
+    PINCMD_SET_OUT_VALUE = 4,   // set output direction and value
+    PINCMD_SET_MODE = 5,        // set pin's mode
+    PINCMD_SKIP = 6             // just skip this command, do not apply pin and value
+} pincmd_t;
+
+
 /**
  * A Structure representing a multiplexer and the required value
  */
 typedef struct {
     /*@{*/
-    unsigned int pin;   /**< Raw GPIO pin id */
-    unsigned int value; /**< Raw GPIO value */
+    unsigned int pincmd; /**< Pin command pincmd_xxxx */
+                         /**< At this time not all boards will support it -> TO DO */
+    unsigned int pin;    /**< Raw GPIO pin id */
+    unsigned int value;  /**< Raw GPIO value */
     /*@}*/
 } mraa_mux_t;
 
@@ -189,7 +218,6 @@ typedef struct {
     unsigned int mux_total; /** Numfer of muxes needed for operation of pin */
     mraa_mux_t mux[6]; /** Array holding information about mux */
     unsigned int output_enable; /** Output Enable GPIO, for level shifting */
-    unsigned int pullup_enable; /** Pull-Up enable GPIO, inputs */
     mraa_pin_cap_complex_t complex_cap;
     /*@}*/
 } mraa_pin_t;
@@ -225,9 +253,9 @@ typedef struct {
  */
 typedef struct {
     /*@{*/
-    unsigned int bus_id; /**< ID as exposed in the system */
-    unsigned int scl; /**< i2c SCL */
-    unsigned int sda; /**< i2c SDA */
+    int bus_id; /**< ID as exposed in the system */
+    int scl; /**< i2c SCL */
+    int sda; /**< i2c SDA */
     // mraa_drv_api_t drv_type; /**< Driver type */
     /*@}*/
 } mraa_i2c_bus_t;
@@ -240,10 +268,10 @@ typedef struct {
     unsigned int bus_id; /**< The Bus ID as exposed to the system. */
     unsigned int slave_s; /**< Slave select */
     mraa_boolean_t three_wire; /**< Is the bus only a three wire system */
-    unsigned int sclk; /**< Serial Clock */
-    unsigned int mosi; /**< Master Out, Slave In. */
-    unsigned int miso; /**< Master In, Slave Out. */
-    unsigned int cs; /**< Chip Select, used when the board is a spi slave */
+    int sclk; /**< Serial Clock */
+    int mosi; /**< Master Out, Slave In. */
+    int miso; /**< Master In, Slave Out. */
+    int cs; /**< Chip Select, used when the board is a spi slave */
     /*@}*/
 } mraa_spi_bus_t;
 
@@ -265,19 +293,19 @@ typedef struct {
 
 typedef struct _board_t {
     /*@{*/
-    unsigned int phy_pin_count; /**< The Total IO pins on board */
+    int phy_pin_count; /**< The Total IO pins on board */
     unsigned int gpio_count; /**< GPIO Count */
     unsigned int aio_count;  /**< Analog side Count */
-    unsigned int i2c_bus_count; /**< Usable i2c Count */
+    int i2c_bus_count; /**< Usable i2c Count */
     mraa_i2c_bus_t  i2c_bus[12]; /**< Array of i2c */
     unsigned int def_i2c_bus; /**< Position in array of default i2c bus */
-    unsigned int spi_bus_count; /**< Usable spi Count */
+    int spi_bus_count; /**< Usable spi Count */
     mraa_spi_bus_t spi_bus[12];       /**< Array of spi */
     unsigned int def_spi_bus; /**< Position in array of defult spi bus */
     unsigned int adc_raw; /**< ADC raw bit value */
     unsigned int adc_supported; /**< ADC supported bit value */
     unsigned int def_uart_dev; /**< Position in array of defult uart */
-    unsigned int uart_dev_count; /**< Usable spi Count */
+    int uart_dev_count; /**< Usable spi Count */
     mraa_uart_dev_t uart_dev[6]; /**< Array of UARTs */
     mraa_boolean_t no_bus_mux; /**< i2c/spi/adc/pwm/uart bus muxing setup not required */
     int pwm_default_period; /**< The default PWM period is US */

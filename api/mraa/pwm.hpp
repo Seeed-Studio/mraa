@@ -46,9 +46,9 @@ class Pwm
      *
      * @param pin the pin number used on your board
      * @param owner if you are the owner of the pin the destructor will
-     * @param chipid the pwmchip to use, use only in raw mode
      * unexport the pin from sysfs, default behaviour is you are the owner
      * if the pinmapper exported it
+     * @param chipid the pwmchip to use, use only in raw mode
      */
     Pwm(int pin, bool owner = true, int chipid = -1)
     {
@@ -77,7 +77,7 @@ class Pwm
      * Set the output duty-cycle percentage, as a float
      *
      * @param percentage A floating-point value representing percentage of
-     * output. The value should lie between 0.0f (representing on 0%) and
+     * output. The value should lie between 0.0f (representing 0%) and
      * 1.0f Values above or below this range will be set at either 0.0f or
      * 1.0f
      * @return Result of operation
@@ -88,10 +88,10 @@ class Pwm
         return (Result) mraa_pwm_write(m_pwm, percentage);
     }
     /**
-     * Read the ouput duty-cycle percentage, as a float
+     * Read the output duty-cycle percentage, as a float
      *
      * @return A floating-point value representing percentage of
-     * output. The value should lie between 0.0f (representing on 0%) and
+     * output. The value should lie between 0.0f (representing 0%) and
      * 1.0f Values above or below this range will be set at either 0.0f or
      * 1.0f
      */
@@ -134,7 +134,7 @@ class Pwm
         return (Result) mraa_pwm_period_us(m_pwm, us);
     }
     /**
-     * Set pulsewidth, As represnted by seconds in a (float)
+     * Set pulsewidth, as represented by seconds in a float
      *
      * @param seconds The duration of a pulse
      * @return Result of operation
@@ -176,54 +176,27 @@ class Pwm
     Result
     enable(bool enable)
     {
-        if (enable)
-            return (Result) mraa_pwm_enable(m_pwm, 1);
-        else
-            return (Result) mraa_pwm_enable(m_pwm, 0);
+        return (Result) mraa_pwm_enable(m_pwm, enable);
     }
     /**
-     * Set the period and duty of a PWM object.
+     * Get the maximum PWM period in us
      *
-     * @param period represented in ms.
-     * @param duty represnted in ms as float.
-     * @return Result of operation
-     */
-    Result
-    config_ms(int period, float duty)
-    {
-        return (Result) mraa_pwm_config_ms(m_pwm, period, duty);
-    }
-    /**
-     * Set the period and duty (percent) of a PWM object.
-     *
-     * @param period as represented in ms.
-     * @param duty percentage i.e. 50% = 0.5f
-     * @return Result of operation
-     */
-    Result
-    config_percent(int period, float duty)
-    {
-        return (Result) mraa_pwm_config_percent(m_pwm, period, duty);
-    }
-    /**
-     * Get the maximum pwm period in us
-     *
-     * @return max pwm in us
+     * @return max PWM period in us
      */
     int
     max_period()
     {
-        return mraa_pwm_get_max_period();
+        return mraa_pwm_get_max_period(m_pwm);
     }
     /**
-     * Get the minimum pwm period in us
+     * Get the minimum PWM period in us
      *
-     * @return min pwm in us
+     * @return min PWM period in us
      */
     int
     min_period()
     {
-        return mraa_pwm_get_min_period();
+        return mraa_pwm_get_min_period(m_pwm);
     }
 
   private:

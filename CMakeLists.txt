@@ -5,10 +5,16 @@ FIND_PACKAGE (Threads REQUIRED)
 
 set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -fno-omit-frame-pointer ")
 set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall ")
-set (LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Installation path for libraries")
 
-# Set CMAKE_LIB_INSTALL_DIR if not defined
+# Set CMAKE_INSTALL_LIBDIR if not defined
 include(GNUInstallDirs)
+
+# Older cmake might not pick CMAKE_INSTALL_LIBDIR right
+if (CMAKE_INSTALL_LIBDIR)
+  set (LIB_INSTALL_DIR "${CMAKE_INSTALL_LIBDIR}" CACHE PATH "Installation path for libraries")
+else ()
+  set (LIB_INSTALL_DIR "lib" CACHE PATH "Installation path for libraries")
+endif ()
 
 # By default, build shared object libraries on linux
 if (UNIX AND NOT APPLE)
@@ -25,11 +31,11 @@ include (GetGitRevisionDescription)
 git_describe (VERSION "--tags")
 if ("x_${VERSION}" STREQUAL "x_GIT-NOTFOUND" OR "x_${VERSION}" STREQUAL "x_HEAD-HASH-NOTFOUND" OR "x_${VERSION}" STREQUAL "x_-128-NOTFOUND")
   message (WARNING " - Install git to compile a production libmraa!")
-  set (VERSION "v0.9.5-dirty")
+  set (VERSION "v1.0.0-dirty")
 endif ()
 
-message (INFO " - libmraa Version ${VERSION}")
-message (INFO " - cmake Version ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
+message (STATUS "INFO - libmraa Version ${VERSION}")
+message (STATUS "INFO - cmake Version ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
 
 #parse the version information into pieces.
 string (REGEX REPLACE "^v([0-9]+)\\..*" "\\1" VERSION_MAJOR "${VERSION}")
@@ -63,6 +69,9 @@ option (BUILDSWIGPYTHON "Build swig python modules." ON)
 option (BUILDSWIGNODE "Build swig node modules." ON)
 option (BUILDSWIGJAVA "Build Java API." OFF)
 option (USBPLAT "Detection USB platform." OFF)
+option (FIRMATA "Add Firmata support to mraa." OFF)
+option (ONEWIRE "Add Onewire support to mraa." ON)
+option (IMRAA "Add Imraa support to mraa." OFF)
 option (FTDI4222 "Build with FTDI FT4222 subplatform support." OFF)
 option (IPK "Generate IPK using CPack" OFF)
 option (RPM "Generate RPM using CPack" OFF)
@@ -84,10 +93,10 @@ endif()
 if (NOT BUILDARCH)
   include (TargetArch)
   target_architecture (DETECTED_ARCH)
-  message( INFO " - Target arch is ${DETECTED_ARCH}")
+  message (STATUS "INFO - Target arch is ${DETECTED_ARCH}")
 else ()
   set (DETECTED_ARCH ${BUILDARCH})
-  message( INFO " - Override arch is ${DETECTED_ARCH}")
+  message (STATUS "INFO - Override arch is ${DETECTED_ARCH}")
 endif()
 
 if (DETECTED_ARCH STREQUAL "i586" OR DETECTED_ARCH STREQUAL "x86_64"
@@ -96,7 +105,7 @@ if (DETECTED_ARCH STREQUAL "i586" OR DETECTED_ARCH STREQUAL "x86_64"
 elseif (DETECTED_ARCH MATCHES "arm.*")
   set (ARMPLAT ON)
 else ()
-  message(FATAL_ERROR "Only x86 and arm platforms currently supported")
+  message (FATAL_ERROR "Only x86 and arm platforms currently supported")
 endif()
 
 if (BUILDSWIGPYTHON OR BUILDTESTS)
@@ -137,9 +146,9 @@ if (IPK)
       set (TARGET_ARCH ${DETECTED_ARCH})
     endif ()
   endif ()
-  message (INFO " - Package arch is ${TARGET_ARCH}")
+  message (STATUS "INFO - Package arch is ${TARGET_ARCH}")
 
-  set(CPACK_GENERATOR "DEB" "TGZ")
+  set(CPACK_GENERATOR "DEB")
   set(OPKG_ARCH ${TARGET_ARCH})
   set(CPACK_BINARY_DIR ${CMAKE_BINARY_DIR})
   set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Intel IoT-Devkit") #required
@@ -161,7 +170,7 @@ if (IPK)
 endif()
 
 if (RPM)
-  message (INFO " - Enabled RPM packaging for ${DETECTED_ARCH}")
+  message (STATUS "INFO - Enabled RPM packaging for ${DETECTED_ARCH}")
   set(CMAKE_INSTALL_PREFIX "/usr")
   set(CPACK_PACKAGE_VERSION ${VERSION})
   set(CPACK_GENERATOR "RPM")
@@ -187,6 +196,10 @@ endif()
 add_subdirectory (src)
 if (ENABLEEXAMPLES)
   add_subdirectory (examples)
+endif ()
+
+if (IMRAA)
+  add_subdirectory (imraa)
 endif ()
 
 if (BUILDTESTS)

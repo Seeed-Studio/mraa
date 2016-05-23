@@ -5,6 +5,38 @@ This changelog is meant as a quick & rough guide to what has changed between
 versions. The API is now fairly stable but when new calls/features are added
 they are listed here. Anything pre 0.2.x is ignored.
 
+**1.0.0**
+  * Change API to enhance error checking in C. Changes include:
+    - mraa_aio_read
+    - mraa_i2c_read_byte
+    - mraa_i2c_read
+    - mraa_i2c_read_byte_data
+    - mraa_i2c_read_word_data
+    - mraa_spi_write_word
+    - mraa::Spi:write_word becomes mraa::Spi::writeWord
+  * Remove MRAA_ERROR_PLATFORM_ALREADY_INITIALISED which was deprecated for C89 compatibility
+  * Remove pwm config_* apis as unused
+  * Add mraa_remove_subplatform
+  * Support NPM for android
+  * Fix AIO always returning channel 0 with firmata support
+
+**0.10.1**
+  * Remove imraa from node package
+
+**0.10.0**
+  * Add Firmata support with -DFIRMATA=ON
+  * Add imraa with support for pinmuxing and arduino101 flashing
+  * Add better support for NVM installed node via NODE_ROOT_DIR.
+  * Mraa bindings now link to libmraa.so.x
+  * mraa_init() now returns MRAA_SUCCESS if platform is already initialize
+  * Mraa java bindings now support JNI 1.6+
+  * Added support for a02082 rpi2
+  * Mraa has a logo!
+
+**0.9.6**
+  * ftdi ft4222 now dynamically loaded
+  * FT4222 improved ISR code
+
 **0.9.5**
   * Add support for the UP board (up-board.org)
   * Support OpenJDK 7 as well as OpenJDK 8
@@ -18,7 +50,7 @@ they are listed here. Anything pre 0.2.x is ignored.
 
 **0.9.3**
   * Intel edison detection much improved
-  * ftdi ft4222 interupt improvement
+  * ftdi ft4222 interrupt improvement
   * small fixes to java lib
 
 **0.9.2**

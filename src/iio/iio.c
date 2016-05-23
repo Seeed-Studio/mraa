@@ -83,6 +83,7 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
     int padint = 0;
     int curr_bytes = 0;
     char shortbuf, signchar;
+    int i = 0;
 
     dev->datasize = 0;
 
@@ -129,12 +130,6 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
                     ret = sscanf(readbuf, "%ce:%c%u/%u>>%u", &shortbuf, &signchar, &chan->bits_used,
                                  &padint, &chan->shift);
                     chan->bytes = padint / 8;
-                    if (curr_bytes % chan->bytes == 0) {
-                        chan->location = curr_bytes;
-                    } else {
-                        chan->location = curr_bytes - curr_bytes % chan->bytes + chan->bytes;
-                    }
-                    curr_bytes = chan->location + chan->bytes;
                     // probably should be 5?
                     if (ret < 0) {
                         // cleanup
@@ -174,6 +169,18 @@ mraa_iio_get_channel_data(mraa_iio_context dev)
         }
     }
     closedir(dir);
+
+    // channel location has to be done in channel index order so do it afetr we
+    // have grabbed all the correct info
+    for (i = 0; i < dev->chan_num; i++) {
+	chan = &dev->channels[i];
+        if (curr_bytes % chan->bytes == 0) {
+            chan->location = curr_bytes;
+        } else {
+            chan->location = curr_bytes - curr_bytes % chan->bytes + chan->bytes;
+        }
+        curr_bytes = chan->location + chan->bytes;
+    }
 
     return MRAA_SUCCESS;
 }
@@ -277,7 +284,7 @@ mraa_iio_write_string(mraa_iio_context dev, const char* attr_name, const char* d
     snprintf(buf, MAX_SIZE, IIO_SYSFS_DEVICE "%d/%s", dev->num, attr_name);
     int fd = open(buf, O_WRONLY);
     if (fd != -1) {
-        size_t len = strlen(data);
+        int len = strlen(data);
         ssize_t status = write(fd, data, len);
         if (status == len)
              result = MRAA_SUCCESS;

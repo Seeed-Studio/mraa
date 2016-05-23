@@ -65,7 +65,7 @@ mraa_pwm_context mraa_pwm_init(int pin);
 mraa_pwm_context mraa_pwm_init_raw(int chipid, int pin);
 
 /**
- * Set the ouput duty-cycle percentage, as a float
+ * Set the output duty-cycle percentage, as a float
  *
  * @param dev The Pwm context to use
  * @param percentage A floating-point value representing percentage of output.
@@ -76,7 +76,7 @@ mraa_pwm_context mraa_pwm_init_raw(int chipid, int pin);
 mraa_result_t mraa_pwm_write(mraa_pwm_context dev, float percentage);
 
 /**
- * Read the ouput duty-cycle percentage, as a float
+ * Read the output duty-cycle percentage, as a float
  *
  * @param dev The Pwm context to use
  * @return percentage A floating-point value representing percentage of output.
@@ -167,38 +167,20 @@ mraa_result_t mraa_pwm_owner(mraa_pwm_context dev, mraa_boolean_t owner);
 mraa_result_t mraa_pwm_close(mraa_pwm_context dev);
 
 /**
- * Set Both Period and DutyCycle on a PWM context
- *
- * @param dev The pwm context to use
- * @param period represented in ms.
- * @param duty dutycycle of the pwm signal.
- * @return Result of operation
- */
-mraa_result_t mraa_pwm_config_ms(mraa_pwm_context dev, int period, float duty);
-
-/**
- * Set Both Period and DutyCycle on a PWM context. Duty represented as percentage.
- *
- * @param dev The pwm context to use
- * @param period represented in ms.
- * @param duty duty percantage. i.e. 50% = 0.5f
- * @return Result of operation
- */
-mraa_result_t mraa_pwm_config_percent(mraa_pwm_context dev, int period, float duty);
-
-/**
  * Get the maximum pwm period in us
  *
+ * @param dev The pwm context to use
  * @return max pwm in us
  */
-int mraa_pwm_get_max_period();
+int mraa_pwm_get_max_period(mraa_pwm_context dev);
 
 /**
  * Get the minimum pwm period in us
  *
+ * @param dev The pwm context to use
  * @return min pwm in us
  */
-int mraa_pwm_get_min_period();
+int mraa_pwm_get_min_period(mraa_pwm_context dev);
 
 #ifdef __cplusplus
 }
