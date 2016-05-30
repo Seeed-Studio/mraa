@@ -538,7 +538,33 @@
 		syslog(LOG_ERR, "pwm: pin not initialized, check that /lib/firmware/%s exists", SYSFS_PWM_OVERLAY);
 	    return NULL;
 	}
-
+	 
+	int is_cape_load()
+	{
+		mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
+		char* capepath = NULL;
+		if(!mraa_file_contains(SYSFS_DEVICES_CAPEMGR_SLOTS, "univ-bbgw")){
+			syslog(LOG_INFO, "univ-bbgw doesnt load ");
+			capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
+			if (capepath == NULL) {
+			    syslog(LOG_ERR, "mraa: Could not find CapeManager");
+			    return ret;
+			}
+			FILE* fh;
+			fh = fopen(capepath, "w");
+			free(capepath);
+			if (fh == NULL) {
+			    syslog(LOG_ERR, "mraa: Failed to open capepath for writing, check access rights for user");
+			    return ret;
+			}
+			if (fprintf(fh, "univ-bbgw") < 0) {
+			    syslog(LOG_ERR,
+				   "mraa: Failed to write to CapeManager, check that /lib/firmware/univ-bbgw.dtbo exists");
+			}
+			fclose(fh);				
+		}
+		return 0;
+	}
 	mraa_board_t*
 	mraa_beaglebone()
 	{
@@ -560,8 +586,12 @@
 	    unsigned int ehrpwm1b_enabled = 0;
 	    unsigned int ehrpwm2a_enabled = 0;
 	    unsigned int ehrpwm2b_enabled = 0;
-	    unsigned int is_rev_c = 0;
+	    unsigned int is_rev_c = -1;
 
+		if(is_cape_load()){
+			goto error;
+		}
+			
 		if (mraa_file_exist(SYSFS_CLASS_MMC "mmc1/mmc1:0001/name")) {
 				 emmc_enabled = 1;
 			}
@@ -569,11 +599,14 @@
 			 // We are on a modern kernel, great!!!!
 			 if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green")) {
 					is_rev_c = 3;
-			 } else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green Wireless")) {
+			 }  
+			 if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Green Wireless")) {
 					is_rev_c = 2;
-			}else if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Black")) {
+			}
+			 if (mraa_file_contains(DT_BASE "/model", "TI AM335x BeagleBone Black")) {
 					is_rev_c = 1;
-			}else if (mraa_file_contains(DT_BASE "/model", "SanCloud BeagleBone Enhanced")) {
+			}
+			 if (mraa_file_contains(DT_BASE "/model", "SanCloud BeagleBone Enhanced")) {
 					is_rev_c = 0;
 			}
 		}
@@ -676,6 +709,9 @@
     if (is_rev_c == 3) {
         b->platform_name = PLATFORM_NAME_BEAGLEBONE_GREEN;
         b->phy_pin_count = MRAA_BEAGLEBONE_BLACK_PINCOUNT;
+    }
+    if (is_rev_c == -1) {
+		goto error;
     }
 
 
