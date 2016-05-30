@@ -63,7 +63,7 @@
 	static uint8_t* mmap_gpio[4] = { NULL, NULL, NULL, NULL };
 	static int mmap_fd = 0;
 	static unsigned int mmap_count = 0;
-
+/*
 	mraa_result_t
 	mraa_beaglebone_mmap_write(mraa_gpio_context dev, int value)
 	{
@@ -181,7 +181,7 @@
 
 	    return MRAA_SUCCESS;
 	}
-
+*/
 	mraa_result_t
 	mraa_beaglebone_aio_get_fp(mraa_aio_context dev)
 	{
@@ -442,6 +442,7 @@
 		pin == 62 ? BB_PWM = 1 : -1; 
 		pin == 19 ? BB_PWM = 2 : -1; 
 		pin == 13 ? BB_PWM = 2 : -1;
+		
 		
 		char *buffer = ReadFile(SYSFS_DEVICES_CAPEMGR_SLOTS);		 	
 		if (buffer) { 
