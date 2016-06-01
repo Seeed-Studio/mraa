@@ -36,37 +36,37 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[1]
 	{ 
-		.name = "DGND",
+		.name = "P8_01",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[2]
 	{ 
-		.name = "DGND",
+		.name = "P8_02",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[3]
 	{ 
-		.name = "MMC1_DATA6",
+		.name = "P8_03",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},			
 	//Pin[4]
 	{ 
-		.name = "MMC1_DATA7",
+		.name = "P8_04",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[5]
 	{ 
-		.name = "MMC1_DATA2",
+		.name = "P8_05",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[6]
 	{ 
-		.name = "MMC1_DATA3",
+		.name = "P8_06",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[7]
 	{ 
-		.name = "GPIO66",
+		.name = "P8_07",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 66,
 		.gpio.parent_id = 0,
@@ -74,7 +74,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[8]
 	{ 
-		.name = "GPIO67",
+		.name = "P8_08",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 67,
 		.gpio.parent_id = 0,
@@ -82,7 +82,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[9]
 	{ 
-		.name = "GPIO69",
+		.name = "P8_09",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 69,
 		.gpio.parent_id = 0,
@@ -91,7 +91,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[10]
 	{ 
-		.name = "GPIO68",
+		.name = "P8_10",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 68,
 		.gpio.parent_id = 0,
@@ -100,7 +100,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[11]
 	{ 
-		.name = "GPIO45",
+		.name = "P8_11",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 45,
 		.gpio.parent_id = 0,
@@ -109,7 +109,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[12]
 	{ 
-		.name = "GPIO44",
+		.name = "P8_12",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 44,
 		.gpio.parent_id = 0,
@@ -118,7 +118,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[13]
 	{ 
-		.name = "GPIO23",
+		.name = "P8_13",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 23,
 		.gpio.parent_id = 0,
@@ -129,7 +129,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},			
 	//Pin[14]
 	{ 
-		.name = "GPIO26",
+		.name = "P8_14",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 26,
 		.gpio.parent_id = 0,
@@ -138,7 +138,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[15]
 	{ 
-		.name = "GPIO47",
+		.name = "P8_15",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 47,
 		.gpio.parent_id = 0,
@@ -147,7 +147,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[16]
 	{ 
-		.name = "GPIO46",
+		.name = "P8_16",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 46,
 		.gpio.parent_id = 0,
@@ -156,7 +156,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[17]
 	{ 
-		.name = "GPIO27",
+		.name = "P8_17",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 27,
 		.gpio.parent_id = 0,
@@ -165,7 +165,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[18]
 	{ 
-		.name = "GPIO65",
+		.name = "P8_18",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 65,
 		.gpio.parent_id = 0,
@@ -174,7 +174,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[19]
 	{ 
-		.name = "GPIO22",
+		.name = "P8_19",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 22,
 		.gpio.parent_id = 0,
@@ -184,38 +184,38 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[20]
 	{ 
-		.name = "MMC1_CMD",
+		.name = "P8_20",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[21]
 	{ 
-		.name = "MMC1_CLK",
+		.name = "P8_21",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[22]
 	{ 
-		.name = "MMC1_DATA5",
+		.name = "P8_22",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[23]
 	{ 
-		.name = "MMC1_DATA4",
+		.name = "P8_23",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},			
 	//Pin[24]
 	{ 
-		.name = "MMC1_DATA1",
+		.name = "P8_24",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[25]
 	{ 
-		.name = "MMC1_DATA1",
+		.name = "P8_25",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 
 	//Pin[26]
 	{ 
-		.name = "GPIO61",
+		.name = "P8_26",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 61,
 		.gpio.parent_id = 0,
@@ -224,7 +224,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[27]
 	{ 
-		.name = "GPIO86",
+		.name = "P8_27",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 86,
 		.gpio.parent_id = 0,
@@ -233,7 +233,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[28]
 	{ 
-		.name = "GPIO88",
+		.name = "P8_28",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 		.gpio.pinmap = 88,
 		.gpio.parent_id = 0,
@@ -242,7 +242,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[29]
 	{ 
-		.name = "GPIO87",
+		.name = "P8_29",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 87,
 			.gpio.parent_id = 0,
@@ -251,7 +251,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[30]
 	{ 
-		.name = "GPIO89",
+		.name = "P8_30",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 89,
 			.gpio.parent_id = 0,
@@ -260,7 +260,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[31]
 	{ 
-		.name = "GPIO10",
+		.name = "P8_31",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 10,
 			.gpio.parent_id = 0,
@@ -269,7 +269,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[32]
 	{ 
-		.name = "GPIO11",
+		.name = "P8_32",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 11,
 			.gpio.parent_id = 0,
@@ -278,7 +278,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[33]
 	{ 
-		.name = "GPIO9",
+		.name = "P8_33",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 9,
 			.gpio.parent_id = 0,
@@ -288,7 +288,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},			
 	//Pin[34]
 	{ 
-		.name = "GPIO81",
+		.name = "P8_34",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 81,
 			.gpio.parent_id = 0,
@@ -299,7 +299,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[35]
 	{ 
-		.name = "GPIO8",
+		.name = "P8_35",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 8,
 			.gpio.parent_id = 0,
@@ -309,7 +309,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[36]
 	{ 
-		.name = "GPIO80",
+		.name = "P8_36",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 80,
 			.gpio.parent_id = 0,
@@ -320,7 +320,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[37]
 	{ 
-		.name = "GPIO78",
+		.name = "P8_37",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 78,
 			.gpio.parent_id = 0,
@@ -329,7 +329,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[38]
 	{ 
-		.name = "GPIO79",
+		.name = "P8_38",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 79,
 			.gpio.parent_id = 0,
@@ -338,7 +338,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[39]
 	{ 
-		.name = "GPIO76",
+		.name = "P8_39",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 76,
 			.gpio.parent_id = 0,
@@ -347,7 +347,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[40]
 	{ 
-		.name = "GPIO77",
+		.name = "P8_40",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 77,
 			.gpio.parent_id = 0,
@@ -356,7 +356,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[41]
 	{ 
-		.name = "GPIO74",
+		.name = "P8_41",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 74,
 			.gpio.parent_id = 0,
@@ -365,7 +365,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[42]
 	{ 
-		.name = "GPIO75",
+		.name = "P8_42",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 75,
 			.gpio.parent_id = 0,
@@ -374,7 +374,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[43]
 	{ 
-		.name = "GPIO72",
+		.name = "P8_43",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 72,
 			.gpio.parent_id = 0,
@@ -383,7 +383,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},			
 	//Pin[44]
 	{ 
-		.name = "GPIO73",
+		.name = "P8_44",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 73,
 			.gpio.parent_id = 0,
@@ -392,7 +392,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[45]
 	{ 
-		.name = "GPIO70",
+		.name = "P8_45",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 70,
 			.gpio.parent_id = 0,
@@ -402,7 +402,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[46]
 	{ 
-		.name = "GPIO71",
+		.name = "P8_46",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 71,
 			.gpio.parent_id = 0,
@@ -412,57 +412,57 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[47]
 	{ 
-		.name = "GND",
+		.name = "P9_01",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[48]
 	{ 
-		.name = "GND",
+		.name = "P9_02",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[49]
 	{ 
-		.name = "3.3V",
+		.name = "P9_03",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[50]
 	{ 
-		.name = "3.3V",
+		.name = "P9_04",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[51]
 	{ 
-		.name = "5V",
+		.name = "P9_05",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[52]
 	{ 
-		.name = "5V",
+		.name = "P9_06",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[53]
 	{ 
-		.name = "5V",
+		.name = "P9_07",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},			
 	//Pin[54]
 	{ 
-		.name = "5V",
+		.name = "P9_08",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[55]
 	{ 
-		.name = "PWR",
+		.name = "P9_09",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[56]
 	{ 
-		.name = "RESET",
+		.name = "P9_10",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[57]
 	{ 
-		.name = "GPIO30",
+		.name = "P9_11",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 30,
 			.gpio.parent_id = 0,
@@ -471,7 +471,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[58]
 	{ 
-		.name = "GPIO60",
+		.name = "P9_12",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 60,
 			.gpio.parent_id = 0,
@@ -480,7 +480,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[59]
 	{ 
-		.name = "GPIO31",
+		.name = "P9_13",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 31,
 			.gpio.parent_id = 0,
@@ -489,7 +489,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[60]
 	{ 
-		.name = "GPIO50",
+		.name = "P9_14",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 50,
 			.gpio.parent_id = 0,
@@ -499,7 +499,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[61]
 	{ 
-		.name = "GPIO48",
+		.name = "P9_15",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 48,
 			.gpio.parent_id = 0,
@@ -507,7 +507,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[62]
 	{ 
-		.name = "GPIO51",
+		.name = "P9_16",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 51,
 			.gpio.parent_id = 0,
@@ -518,7 +518,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[63]
 	{ 
-		.name = "GPIO5",
+		.name = "P9_17",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 },
 			.gpio.pinmap = 5,
 			.gpio.parent_id = 0,
@@ -528,7 +528,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},			
 	//Pin[64]
 	{ 
-		.name = "GPIO4",
+		.name = "P9_18",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 1, 1, 0, 0 },
 			.gpio.pinmap = 4,
 			.gpio.parent_id = 0,
@@ -538,7 +538,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[65]
 	{ 
-		.name = "GPIO13",
+		.name = "P9_19",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 13,
 			.gpio.parent_id = 0,
@@ -547,7 +547,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[66]
 	{ 
-		.name = "GPIO12",
+		.name = "P9_20",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 12,
 			.gpio.parent_id = 0,
@@ -556,7 +556,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[67]
 	{ 
-		.name = "GPIO3",
+		.name = "P9_21",
 		.capabilites  = (mraa_pincapabilities_t){1, 1, 1, 0, 1, 0, 0, 1 },
 			.gpio.pinmap = 13,
 			.gpio.parent_id = 0,
@@ -568,7 +568,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[68]
 	{ 
-		.name = "GPIO2",
+		.name = "P9_22",
 		.capabilites  = (mraa_pincapabilities_t){  1, 1, 1, 0, 1, 0, 0, 1 },
 			.gpio.pinmap = 2,
 			.gpio.parent_id = 0,
@@ -580,7 +580,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[69]
 	{ 
-		.name = "GPIO49",
+		.name = "P9_23",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 49,
 			.gpio.parent_id = 0,
@@ -589,7 +589,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[70]
 	{ 
-		.name = "GPIO15",
+		.name = "P9_24",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 15,
 			.gpio.parent_id = 0,
@@ -598,7 +598,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[71]
 	{ 
-		.name = "GPIO117",
+		.name = "P9_25",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 117,
 			.gpio.parent_id = 0,
@@ -607,7 +607,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[72]
 	{ 
-		.name = "GPIO14",
+		.name = "P9_26",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 14,
 			.gpio.parent_id = 0,
@@ -616,7 +616,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[73]
 	{ 
-		.name = "GPIO115",
+		.name = "P9_27",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 115,
 			.gpio.parent_id = 0,
@@ -625,7 +625,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},			
 	//Pin[74]
 	{ 
-		.name = "GPIO113",
+		.name = "P9_28",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 1 },
 			.gpio.pinmap = 113,
 			.gpio.parent_id = 0,
@@ -637,7 +637,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[75]
 	{ 
-		.name = "GPIO111",
+		.name = "P9_29",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 111,
 			.gpio.parent_id = 0,
@@ -649,7 +649,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[76]
 	{ 
-		.name = "GPIO112",
+		.name = "P9_30",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 112,
 			.gpio.parent_id = 0,
@@ -660,7 +660,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[77]
 	{ 
-		.name = "GPIO110",
+		.name = "P9_31",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 89,
 			.gpio.parent_id = 0,
@@ -672,53 +672,53 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[78]
 	{ 
-		.name = "VDD_ADC",
+		.name = "P9_32",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 
 	},
 	//Pin[79]
 	{ 
-		.name = "AIN4",
+		.name = "P9_33",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[80]
 	{ 
-		.name = "GND_ADC",
+		.name = "P9_34",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[81]
 	{ 
-		.name = "AIN6",
+		.name = "P9_35",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[82]
 	{ 
-		.name = "AIN5",
+		.name = "P9_36",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[83]
 	{ 
-		.name = "AIN2",
+		.name = "P9_37",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[84]
 	{ 
-		.name = "AIN3",
+		.name = "P9_38",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},			
 	//Pin[85]
 	{ 
-		.name = "AIN0",
+		.name = "P9_39",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[86]
 	{ 
-		.name = "AIN1",
+		.name = "P9_40",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
 	},
 	//Pin[87]
 	{ 
-		.name = "GPIO20",
+		.name = "P9_41",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
 			.gpio.pinmap = 20,
 			.gpio.parent_id = 0,
@@ -727,7 +727,7 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[88]
 	{ 
-		.name = "GPIO7",
+		.name = "P9_42",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 1 },
 			.gpio.pinmap = 7,
 			.gpio.parent_id = 0,
@@ -740,22 +740,22 @@ mraa_pininfo_t bbg_pininfos[] = {
 	},
 	//Pin[89]
 	{ 
-		.name = "GND",
+		.name = "P9_43",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[90]
 	{ 
-		.name = "GND",
+		.name = "P9_44",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[91]
 	{ 
-		.name = "GND",
+		.name = "P9_45",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[92]
 	{ 
-		.name = "GND",
+		.name = "P9_46",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	}
 };
