@@ -1,8 +1,8 @@
 /*
- * Author: Thomas Ingleby <thomas.c.ingleby@intel.com>
- * Author: Michael Ring <mail@michael-ring.org>
- * Copyright (c) 2014 Intel Corporation.
- *
+ * Copyright (c) 2016 seeed technology inc.
+ * Website    : www.seeed.cc
+ * Author     : Baozhu Zuo
+
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -30,7 +30,6 @@ extern "C" {
 #endif
 
 #include "mraa_internal.h"
-
 #define MRAA_BEAGLEBONE_BLACK_PINCOUNT 93
 
 mraa_board_t *
