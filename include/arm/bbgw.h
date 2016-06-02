@@ -117,7 +117,6 @@ mraa_pininfo_t bbgw_pininfos[] = {
 		.gpio.mux_total = 0,
 		.pwm.pinmap = 0,
 		.pwm.mux_total = 0
-
 	},			
 	//Pin[14]
 	{ 
@@ -346,7 +345,6 @@ mraa_pininfo_t bbgw_pininfos[] = {
 			.gpio.pinmap = 72,
 			.gpio.parent_id = 0,
 			.gpio.mux_total = 0
-
 	},			
 	//Pin[44]
 	{ 
@@ -439,11 +437,7 @@ mraa_pininfo_t bbgw_pininfos[] = {
 	//Pin[58]
 	{ 
 		.name = "P9_12",
-		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 0 },
-			.gpio.pinmap = 60,
-			.gpio.parent_id = 0,
-			.gpio.mux_total = 0
-
+		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 0, 0 },
 	},
 	//Pin[59]
 	{ 
@@ -611,6 +605,7 @@ mraa_pininfo_t bbgw_pininfos[] = {
 	{ 
 		.name = "P9_33",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 5
 	},
 	//Pin[80]
 	{ 
@@ -621,31 +616,37 @@ mraa_pininfo_t bbgw_pininfos[] = {
 	{ 
 		.name = "P9_35",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 7
 	},
 	//Pin[82]
 	{ 
 		.name = "P9_36",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 6
 	},
 	//Pin[83]
 	{ 
 		.name = "P9_37",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 3
 	},
 	//Pin[84]
 	{ 
 		.name = "P9_38",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 4
 	},			
 	//Pin[85]
 	{ 
 		.name = "P9_39",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 1
 	},
 	//Pin[86]
 	{ 
 		.name = "P9_40",
 		.capabilites  = (mraa_pincapabilities_t){ 1, 0, 0, 0, 0, 0, 1, 0 },
+		.aio.pinmap = 2
 	},
 	//Pin[87]
 	{ 
