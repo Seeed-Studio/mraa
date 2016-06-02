@@ -33,6 +33,7 @@
 #include "arm/bbg.h"
 #include "arm/bbgw.h"
 
+#define AIN_OVERLAY "BB-ADC"
 
 
 #define DT_BASE "/sys/firmware/devicetree/base"
@@ -112,16 +113,58 @@ mraa_result_t mraa_beaglebone_gpio_init_pre (int pin)
 		return MRAA_ERROR_UNSPECIFIED;
 	return MRAA_SUCCESS;
 }
-mraa_result_t mraa_beaglebone_aio_get_fp(mraa_aio_context dev)
-{
-    return MRAA_SUCCESS;
+mraa_result_t mraa_beaglebone_aio_init_internal_replace (mraa_aio_context dev, int pin){
+    mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
+    char devpath[MAX_SIZE];
+    char overlay[MAX_SIZE];
+    char* capepath = NULL;
+	int timeout = 5;
+	int i = 0;
+
+	 dev->channel = pin - 1;
+	 dev->adc_in_fp = -1;
+    sprintf(devpath, "/sys/bus/iio/devices/iio:device0/in_voltage%d_raw", dev->channel);
+
+    if (!mraa_file_exist(devpath)) {
+        capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
+        if (capepath == NULL) {
+            syslog(LOG_ERR, "ain: Could not find CapeManager");
+            return ret;
+        }
+        FILE* fh;
+        fh = fopen(capepath, "w");
+        free(capepath);
+        if (fh == NULL) {
+            syslog(LOG_ERR, "ain: Failed to open capepath for writing, check access rights for user");
+            return ret;
+        }
+        if (fprintf(fh, AIN_OVERLAY) < 0) {
+            syslog(LOG_ERR, "ain: Failed to write to CapeManager");
+        }
+
+		fclose(fh);
+
+		while(timeout--) {
+			if (mraa_file_exist(devpath)) {
+				syslog(LOG_ERR, "ain: Device init O.K!");
+	    	    return MRAA_SUCCESS;
+			} else {
+				syslog(LOG_ERR, "ain: sleep(1)");
+                sleep(1);
+            }
+		}
+        syslog(LOG_ERR, "ain: Device not initialized!");
+    }
+    else {
+		ret = MRAA_SUCCESS;
+	}
+    return ret; 
+
 }
 
 mraa_result_t mraa_beaglebone_aio_init_pre(unsigned int aio)
 {
-    mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
 
-    return ret; 
 }
 
 mraa_result_t mraa_beaglebone_uart_init_pre(int index)
@@ -214,7 +257,7 @@ mraa_board_t* mraa_beaglebone()
 		goto error;
 	}
 
-	b->aio_count = 7;
+	b->aio_count = 7+1;
 	b->adc_raw = 12;
 	b->adc_supported = 12;
 	b->pwm_default_period = 500;
@@ -236,8 +279,9 @@ mraa_board_t* mraa_beaglebone()
 	if(is_rev_c == 3)
 		b->pins = bbg_pininfos;
 	b->adv_func->gpio_init_pre = &mraa_beaglebone_gpio_init_pre;
-	b->adv_func->aio_get_valid_fp = &mraa_beaglebone_aio_get_fp;
-	b->adv_func->aio_init_pre = &mraa_beaglebone_aio_init_pre;
+	//b->adv_func->aio_get_valid_fp = &mraa_beaglebone_aio_get_fp;
+	b->adv_func->aio_init_internal_replace =  &mraa_beaglebone_aio_init_internal_replace;
+	//b->adv_func->aio_init_pre = &mraa_beaglebone_aio_init_pre;
 	b->adv_func->uart_init_pre = &mraa_beaglebone_uart_init_pre;
 	b->adv_func->spi_init_pre = &mraa_beaglebone_spi_init_pre;
 	b->adv_func->i2c_init_pre = &mraa_beaglebone_i2c_init_pre;
