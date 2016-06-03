@@ -35,7 +35,128 @@
 
 #define MAX_SIZE 64
 #define SYSFS_PWM "/sys/class/pwm"
-
+typedef struct _bone_pwm_list {
+	int pin;
+	char name[8];
+	char chip[16];
+	char addr[16];
+	char index[8];
+	char module[8];
+}bone_pwm_list;
+static bone_pwm_list bone_pwm[] = {
+	{
+		.pin = 23,
+		.name = "P8_13",
+		.chip = "48304000.epwmss",
+		.addr = "48304200.pwm",
+		.index = "1",
+		.module = "ehrpwm2"
+	},
+	{
+		.pin = 22,
+		.name = "P8_19",
+		.chip = "48304000.epwmss",
+		.addr = "48304200.pwm",
+		.index = "0",
+		.module = "ehrpwm2"
+	},
+	{
+		.pin = 81,
+		.name = "P8_34",
+		.chip = "48302000.epwmss",
+		.addr = "48302200.pwm",
+		.index = "1",
+		.module = "ehrpwm1"
+	},
+	{
+		.pin = 80,
+		.name = "P8_36",
+		.chip = "48302000.epwmss",
+		.addr = "48302200.pwm",
+		.index = "0",
+		.module = "ehrpwm1"
+	},
+	{
+		.pin = 70,
+		.name = "P8_45",
+		.chip = "48304000.epwmss",
+		.addr = "48304200.pwm",
+		.index = "0",
+		.module = "ehrpwm2"
+	},
+	{
+		.pin = 71,
+		.name = "P8_46",
+		.chip = "48304000.epwmss",
+		.addr = "48304200.pwm",
+		.index = "1",
+		.module = "ehrpwm2"
+	},
+	{
+		.pin = 50,
+		.name = "P9_14",
+		.chip = "48302000.epwmss",
+		.addr = "48302200.pwm",
+		.index = "0",
+		.module = "ehrpwm1"
+	},
+	{
+		.pin = 51,
+		.name = "P9_16",
+		.chip = "48302000.epwmss",
+		.addr = "48302200.pwm",
+		.index = "1",
+		.module = "ehrpwm2"
+	},
+	{
+		.pin = 3,
+		.name = "P9_21",
+		.chip = "48300000.epwmss",
+		.addr = "48300200.pwm",
+		.index = "1",
+		.module = "ehrpwm0"
+	},
+	{
+		.pin = 2,
+		.name = "P9_22",
+		.chip = "48300000.epwmss",
+		.addr = "48300200.pwm",
+		.index = "0",
+		.module = "ehrpwm0"
+	},
+	{
+		.pin = 113,
+		.name = "P9_28",
+		.chip = "48304000.epwmss",
+		.addr = "48304100.ecap",
+		.index = "2",
+		.module = "ecap2"
+	},
+	{
+		.pin = 111,
+		.name = "P9_29",
+		.chip = "48300000.epwmss",
+		.addr = "48300200.ehrpwm",
+		.index = "1",
+		.module = "ehrpwm0"
+	},
+	{
+		.pin = 89,
+		.name = "P9_31",
+		.chip = "48300000.epwmss",
+		.addr = "48300200.ehrpwm",
+		.index = "0",
+		.module = "ehrpwm0"
+	},
+	{
+		.pin = 7,
+		.name = "P9_42",
+		.chip = "48300000.epwmss",
+		.addr = "48300100.ecap",
+		.index = "0",
+		.module = "ecap0"
+	}
+};
 static int
 mraa_pwm_setup_duty_fp(mraa_pwm_context dev)
 {
