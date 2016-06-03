@@ -190,7 +190,9 @@ mraa_result_t mraa_beaglebone_i2c_init_pre(unsigned int bus)
 
 mraa_pwm_context mraa_beaglebone_pwm_init_replace(int pin)
 {
-
+	if(set_pinmux(pin,"pwm"))
+		return MRAA_ERROR_UNSPECIFIED;
+	return MRAA_SUCCESS;
 }
 
 static int is_cape_load(unsigned int is_rev_c)
