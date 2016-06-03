@@ -32,7 +32,7 @@ main()
     float adc_value_float;
     mraa::Aio* a0;
 
-    a0 = new mraa::Aio(0);
+    a0 = new mraa::Aio(1);
     if (a0 == NULL) {
         return MRAA_ERROR_UNSPECIFIED;
     }

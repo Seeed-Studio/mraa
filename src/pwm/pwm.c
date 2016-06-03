@@ -37,131 +37,161 @@
 #define SYSFS_PWM "/sys/class/pwm"
 typedef struct _bone_pwm_list {
 	int pin;
+	int sysfs;
 	char name[8];
 	char chip[16];
 	char addr[16];
-	char index[8];
+	int index;
 	char module[8];
-}bone_pwm_list;
-static bone_pwm_list bone_pwm[] = {
+}bone_pwm;
+#define BONE_PWM_COUNT 14
+static bone_pwm bone_pwm_list[] = {
 	{
 		.pin = 23,
+		.sysfs = 6,
 		.name = "P8_13",
 		.chip = "48304000.epwmss",
 		.addr = "48304200.pwm",
-		.index = "1",
+		.index = 1,
 		.module = "ehrpwm2"
 	},
 	{
 		.pin = 22,
+		.sysfs = 6,
 		.name = "P8_19",
 		.chip = "48304000.epwmss",
 		.addr = "48304200.pwm",
-		.index = "0",
+		.index = 0,
 		.module = "ehrpwm2"
 	},
 	{
 		.pin = 81,
+		.sysfs = 4,
 		.name = "P8_34",
 		.chip = "48302000.epwmss",
 		.addr = "48302200.pwm",
-		.index = "1",
+		.index = 1,
 		.module = "ehrpwm1"
 	},
 	{
 		.pin = 80,
+		.sysfs = 4,
 		.name = "P8_36",
 		.chip = "48302000.epwmss",
 		.addr = "48302200.pwm",
-		.index = "0",
+		.index = 0,
 		.module = "ehrpwm1"
 	},
 	{
 		.pin = 70,
+		.sysfs = 6,
 		.name = "P8_45",
 		.chip = "48304000.epwmss",
 		.addr = "48304200.pwm",
-		.index = "0",
+		.index = 0,
 		.module = "ehrpwm2"
 	},
 	{
 		.pin = 71,
+		.sysfs = 6,
 		.name = "P8_46",
 		.chip = "48304000.epwmss",
 		.addr = "48304200.pwm",
-		.index = "1",
+		.index = 1,
 		.module = "ehrpwm2"
 	},
 	{
 		.pin = 50,
+		.sysfs = 4,
 		.name = "P9_14",
 		.chip = "48302000.epwmss",
 		.addr = "48302200.pwm",
-		.index = "0",
+		.index = 0,
 		.module = "ehrpwm1"
 	},
 	{
 		.pin = 51,
+		.sysfs = 4,
 		.name = "P9_16",
 		.chip = "48302000.epwmss",
 		.addr = "48302200.pwm",
-		.index = "1",
+		.index = 1,
 		.module = "ehrpwm2"
 	},
 	{
 		.pin = 3,
+		.sysfs = 2,
 		.name = "P9_21",
 		.chip = "48300000.epwmss",
 		.addr = "48300200.pwm",
-		.index = "1",
+		.index = 1,
 		.module = "ehrpwm0"
 	},
 	{
 		.pin = 2,
+		.sysfs = 2,
 		.name = "P9_22",
 		.chip = "48300000.epwmss",
 		.addr = "48300200.pwm",
-		.index = "0",
+		.index = 0,
 		.module = "ehrpwm0"
 	},
 	{
 		.pin = 113,
+		.sysfs = 1,
 		.name = "P9_28",
 		.chip = "48304000.epwmss",
 		.addr = "48304100.ecap",
-		.index = "2",
+		.index = 2,
 		.module = "ecap2"
 	},
 	{
 		.pin = 111,
+		.sysfs = 2,
 		.name = "P9_29",
 		.chip = "48300000.epwmss",
-		.addr = "48300200.ehrpwm",
-		.index = "1",
+		.addr = "48300200.pwm",
+		.index = 1,
 		.module = "ehrpwm0"
 	},
 	{
 		.pin = 89,
+		.sysfs = 2,
 		.name = "P9_31",
 		.chip = "48300000.epwmss",
-		.addr = "48300200.ehrpwm",
-		.index = "0",
+		.addr = "48300200.pwm",
+		.index = 0,
 		.module = "ehrpwm0"
 	},
 	{
 		.pin = 7,
+		.sysfs = 0,
 		.name = "P9_42",
 		.chip = "48300000.epwmss",
 		.addr = "48300100.ecap",
-		.index = "0",
+		.index = 0,
 		.module = "ecap0"
 	}
 };
+static bone_pwm get_bone_pwm(int pin){
+	int i = 0;
+	for(i = 0 ; i < BONE_PWM_COUNT ; i++){
+		if(pin == bone_pwm_list[i].pin)
+			return bone_pwm_list[i];
+	}
+}
+
 static int
 mraa_pwm_setup_duty_fp(mraa_pwm_context dev)
 {
     char bu[MAX_SIZE];
-    snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/duty_cycle", dev->chipid, dev->pin);
+	bone_pwm pwm_b = get_bone_pwm(dev->pin);
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0)
+		///sys/devices/platform/ocp/48302000.epwmss/48302200.pwm/pwm/pwmchip2/pwm1/period
+    	snprintf(bu, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/pwm%d/duty_cycle", 
+    												pwm_b.chip, pwm_b.addr,pwm_b.sysfs,pwm_b.index);
+	else
+    	snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/duty_cycle", dev->chipid, dev->pin);
 
     dev->duty_fp = open(bu, O_RDWR);
     if (dev->duty_fp == -1) {
@@ -186,7 +216,13 @@ mraa_pwm_write_period(mraa_pwm_context dev, int period)
         return result;
     }
     char bu[MAX_SIZE];
-    snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/period", dev->chipid, dev->pin);
+	bone_pwm pwm_b = get_bone_pwm(dev->pin);
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0)
+		///sys/devices/platform/ocp/48302000.epwmss/48302200.pwm/pwm/pwmchip2/pwm1/period
+    	snprintf(bu, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/pwm%d/period", 
+    												pwm_b.chip, pwm_b.addr,pwm_b.sysfs,pwm_b.index);
+	else
+    	snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/period", dev->chipid, dev->pin);
 
     int period_f = open(bu, O_RDWR);
     if (period_f == -1) {
@@ -247,8 +283,14 @@ mraa_pwm_read_period(mraa_pwm_context dev)
 
     char bu[MAX_SIZE];
     char output[MAX_SIZE];
-    snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/period", dev->chipid, dev->pin);
-
+	bone_pwm pwm_b = get_bone_pwm(dev->pin);
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0)
+		///sys/devices/platform/ocp/48302000.epwmss/48302200.pwm/pwm/pwmchip2/pwm1/period
+    	snprintf(bu, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/pwm%d/period", 
+    												pwm_b.chip, pwm_b.addr,pwm_b.sysfs,pwm_b.index);
+	else
+		snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/period", dev->chipid, dev->pin);
+	
     int period_f = open(bu, O_RDWR);
     if (period_f == -1) {
         syslog(LOG_ERR, "pwm%i read_period: Failed to open period for reading: %s", dev->pin, strerror(errno));
@@ -555,7 +597,12 @@ mraa_pwm_enable(mraa_pwm_context dev, int enable)
     }
 
     char bu[MAX_SIZE];
-    snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/enable", dev->chipid, dev->pin);
+	bone_pwm pwm_b = get_bone_pwm(dev->pin);
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0)
+    	snprintf(bu, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/pwm%d/enable", 
+    												pwm_b.chip, pwm_b.addr,pwm_b.sysfs,pwm_b.index);
+	else	
+    	snprintf(bu, MAX_SIZE, "/sys/class/pwm/pwmchip%d/pwm%d/enable", dev->chipid, dev->pin);
 
     int enable_f = open(bu, O_RDWR);
 
@@ -574,11 +621,20 @@ mraa_pwm_enable(mraa_pwm_context dev, int enable)
     return MRAA_SUCCESS;
 }
 
+int bone_pwm_export(mraa_pwm_context dev){
+	return 0;
+}
+
 mraa_result_t
 mraa_pwm_unexport_force(mraa_pwm_context dev)
 {
     char filepath[MAX_SIZE];
-    snprintf(filepath, MAX_SIZE, "/sys/class/pwm/pwmchip%d/unexport", dev->chipid);
+	bone_pwm pwm_b = get_bone_pwm(dev->pin);
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0)
+    	snprintf(filepath, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/unexport", 
+    												pwm_b.chip, pwm_b.addr,pwm_b.sysfs);
+	else	
+    	snprintf(filepath, MAX_SIZE, "/sys/class/pwm/pwmchip%d/unexport", dev->chipid);
 
     int unexport_f = open(filepath, O_WRONLY);
     if (unexport_f == -1) {
