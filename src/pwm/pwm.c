@@ -374,6 +374,26 @@ mraa_pwm_init_internal(mraa_adv_func_t* func_table, int chipin, int pin)
 
     return dev;
 }
+static int bone_pwm_export(int pin){
+	bone_pwm pwm_b = get_bone_pwm(pin);
+	char bu[MAX_SIZE];
+	//sys/devices/platform/ocp/48300000.epwmss/48300200.pwm/pwm/pwmchip0/export
+	snprintf(bu, MAX_SIZE, "/sys/devices/platform/ocp/%s/%s/pwm/pwmchip%d/export", pwm_b.chip, pwm_b.addr,pwm_b.sysfs);
+    int export_f = open(bu, O_RDWR);
+    if (export_f == -1) {
+        syslog(LOG_ERR, "pwm%i write_export: Failed to open export for writing: %s", pin, strerror(errno));
+        return MRAA_ERROR_INVALID_RESOURCE;
+    }
+    char out[MAX_SIZE];
+    int length = snprintf(out, MAX_SIZE, "%d", pwm_b.index);
+    if (write(export_f, out, length * sizeof(char)) == -1) {
+        close(export_f);
+        syslog(LOG_ERR, "pwm%i write_period: Failed to write to period: %s", pin, strerror(errno));
+        return MRAA_ERROR_INVALID_RESOURCE;
+    }
+    close(export_f);	
+	return 0;
+}
 
 mraa_pwm_context
 mraa_pwm_init(int pin)
@@ -400,6 +420,9 @@ mraa_pwm_init(int pin)
         syslog(LOG_ERR, "pwm_init: pin %i not capable of pwm", pin);
         return NULL;
     }
+	if(bcmp(plat->platform_name, "Beaglebone",10) == 0){
+		bone_pwm_export(pin);
+	}
 
     if (board->adv_func->pwm_init_replace != NULL) {
         return board->adv_func->pwm_init_replace(pin);
@@ -621,9 +644,6 @@ mraa_pwm_enable(mraa_pwm_context dev, int enable)
     return MRAA_SUCCESS;
 }
 
-int bone_pwm_export(mraa_pwm_context dev){
-	return 0;
-}
 
 mraa_result_t
 mraa_pwm_unexport_force(mraa_pwm_context dev)
