@@ -162,11 +162,6 @@ mraa_result_t mraa_beaglebone_aio_init_internal_replace (mraa_aio_context dev, i
 
 }
 
-mraa_result_t mraa_beaglebone_aio_init_pre(unsigned int aio)
-{
-
-}
-
 mraa_result_t mraa_beaglebone_uart_init_pre(int index)
 {
     mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
@@ -188,7 +183,7 @@ mraa_result_t mraa_beaglebone_i2c_init_pre(unsigned int bus)
 }
 
 
-mraa_pwm_context mraa_beaglebone_pwm_init_pre(int pin)
+mraa_result_t mraa_beaglebone_pwm_init_pre(int pin)
 {
 	int pinnum;
 	int is_rev_c = get_board_model();
@@ -199,7 +194,7 @@ mraa_pwm_context mraa_beaglebone_pwm_init_pre(int pin)
 	
 	if(set_pinmux(pinnum,"pwm")){
 		syslog(LOG_ERR, "mraa: Failed to write pwm pinmux");
-		return NULL;
+		return MRAA_ERROR_UNSPECIFIED;
 	}
 	return MRAA_SUCCESS;
 }
