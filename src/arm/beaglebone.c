@@ -102,7 +102,7 @@ static int set_pinmux(int pin, char* function){
 	            syslog(LOG_ERR, "gpio: Failed to write to %s pinmux",function);
 	        }
        		fclose(fh);
-		}else
+	}else
 			return MRAA_ERROR_UNSPECIFIED;
 	free(name);	
 	return MRAA_SUCCESS;
@@ -188,10 +188,19 @@ mraa_result_t mraa_beaglebone_i2c_init_pre(unsigned int bus)
 }
 
 
-mraa_pwm_context mraa_beaglebone_pwm_init_replace(int pin)
+mraa_pwm_context mraa_beaglebone_pwm_init_pre(int pin)
 {
-	if(set_pinmux(pin,"pwm"))
-		return MRAA_ERROR_UNSPECIFIED;
+	int pinnum;
+	int is_rev_c = get_board_model();
+	if(2 == is_rev_c)
+		pinnum = bbgw_pininfos[pin].gpio.pinmap;
+	else
+		pinnum = bbg_pininfos[pin].gpio.pinmap;
+	
+	if(set_pinmux(pinnum,"pwm")){
+		syslog(LOG_ERR, "mraa: Failed to write pwm pinmux");
+		return NULL;
+	}
 	return MRAA_SUCCESS;
 }
 
@@ -222,7 +231,7 @@ static int is_cape_load(unsigned int is_rev_c)
 		    syslog(LOG_ERR,
 			   "mraa: Failed to write to CapeManager, check that /lib/firmware/%s.dtbo exists",capename);
 		}
-		fclose(fh);				
+		fclose(fh);			
 	}
 	return 0;
 }
@@ -287,7 +296,7 @@ mraa_board_t* mraa_beaglebone()
 	b->adv_func->uart_init_pre = &mraa_beaglebone_uart_init_pre;
 	b->adv_func->spi_init_pre = &mraa_beaglebone_spi_init_pre;
 	b->adv_func->i2c_init_pre = &mraa_beaglebone_i2c_init_pre;
-	b->adv_func->pwm_init_replace = &mraa_beaglebone_pwm_init_replace;
+	b->adv_func->pwm_init_pre = &mraa_beaglebone_pwm_init_pre;
 	
     // BUS DEFINITIONS
     b->i2c_bus_count = 2;
