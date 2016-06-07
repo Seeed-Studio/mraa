@@ -289,6 +289,7 @@ mraa_pwm_write_period(mraa_pwm_context dev, int period)
     int length = snprintf(out, MAX_SIZE, "%d", period);
     if (write(period_f, out, length * sizeof(char)) == -1) {
         close(period_f);
+		free(pwmchip);
         syslog(LOG_ERR, "pwm%i write_period: Failed to write to period: %s", dev->pin, strerror(errno));
         return MRAA_ERROR_INVALID_RESOURCE;
     }
@@ -338,8 +339,6 @@ mraa_pwm_read_period(mraa_pwm_context dev)
         return dev->period;
     }
 	
-	
-
     char bu[MAX_SIZE];
     char output[MAX_SIZE];
 	int index = get_bone_pwm(dev->pin);
@@ -458,6 +457,7 @@ static int bone_pwm_export(int pin){
 	if(!mraa_file_exist(pwmfile)){
 	    if (write(export_f, out, length * sizeof(char)) == -1) {
 	        close(export_f);
+			free(pwmchip);
 	        syslog(LOG_ERR, "pwm%i write_export: Failed to write to export index: %s", pin, strerror(errno));
 	        return MRAA_ERROR_INVALID_RESOURCE;
 	    }
@@ -590,8 +590,8 @@ mraa_pwm_init_raw(int chipin, int pin)
     }*/
     	dev->pin = pin;
         dev->owner = 1;
-        mraa_pwm_period_us(dev, plat->pwm_default_period);
-    mraa_pwm_setup_duty_fp(dev);
+      //  mraa_pwm_period_us(dev, plat->pwm_default_period);
+    //mraa_pwm_setup_duty_fp(dev);
     return dev;
 }
 
@@ -716,6 +716,7 @@ mraa_pwm_enable(mraa_pwm_context dev, int enable)
     if (write(enable_f, out, size * sizeof(char)) == -1) {
         syslog(LOG_ERR, "pwm_enable: pwm%i: Failed to write to enable: %s", dev->pin, strerror(errno));
         close(enable_f);
+		free(pwmchip);
         return MRAA_ERROR_UNSPECIFIED;
     }
     close(enable_f);
@@ -743,10 +744,11 @@ mraa_pwm_unexport_force(mraa_pwm_context dev)
     }
 
     char out[MAX_SIZE];
-    int size = snprintf(out, MAX_SIZE, "%d", dev->pin);
+    int size = snprintf(out, MAX_SIZE, "%d", bone_pwm_list[index].index);
     if (write(unexport_f, out, size * sizeof(char)) == -1) {
         syslog(LOG_ERR, "pwm_unexport: pwm%i: Failed to write to unexport: %s", dev->pin, strerror(errno));
         close(unexport_f);
+		free(pwmchip);
         return MRAA_ERROR_UNSPECIFIED;
     }
 
