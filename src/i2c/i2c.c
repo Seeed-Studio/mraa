@@ -100,7 +100,6 @@ mraa_i2c_init_internal(mraa_adv_func_t* advance_func, unsigned int bus)
     } else {
         char filepath[32];
         snprintf(filepath, 32, "/dev/i2c-%u", bus);
-		printf("%s\n",filepath);
         if ((dev->fh = open(filepath, O_RDWR)) < 1) {
             syslog(LOG_ERR, "i2c%i_init: Failed to open requested i2c port %s: %s", bus, filepath, strerror(errno));
             status = MRAA_ERROR_INVALID_RESOURCE;
