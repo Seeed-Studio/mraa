@@ -73,9 +73,10 @@ static mraa_i2c_context
 mraa_i2c_init_internal(mraa_adv_func_t* advance_func, unsigned int bus)
 {
     mraa_result_t status = MRAA_SUCCESS;
-
-    if (advance_func == NULL)
+    if (advance_func == NULL){
+		syslog(LOG_CRIT, "i2c%i_init: advance_func is NULL", bus);
         return NULL;
+    }
 
     mraa_i2c_context dev = (mraa_i2c_context) calloc(1, sizeof(struct _i2c));
     if (dev == NULL) {
@@ -99,6 +100,7 @@ mraa_i2c_init_internal(mraa_adv_func_t* advance_func, unsigned int bus)
     } else {
         char filepath[32];
         snprintf(filepath, 32, "/dev/i2c-%u", bus);
+		printf("%s\n",filepath);
         if ((dev->fh = open(filepath, O_RDWR)) < 1) {
             syslog(LOG_ERR, "i2c%i_init: Failed to open requested i2c port %s: %s", bus, filepath, strerror(errno));
             status = MRAA_ERROR_INVALID_RESOURCE;
@@ -162,6 +164,7 @@ mraa_i2c_init(int bus)
         syslog(LOG_ERR, "Invalid i2c bus %i, moving to default i2c bus %i", bus, board->def_i2c_bus);
         bus = board->def_i2c_bus;
     }
+	/*
     if (!board->no_bus_mux) {
         int pos = board->i2c_bus[bus].sda;
         if (board->pins[pos].i2c.mux_total > 0) {
@@ -179,7 +182,7 @@ mraa_i2c_init(int bus)
             }
         }
     }
-
+	*/
     return mraa_i2c_init_internal(board->adv_func, (unsigned int) board->i2c_bus[bus].bus_id);
 }
 
