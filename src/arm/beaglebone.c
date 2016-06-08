@@ -179,7 +179,11 @@ mraa_result_t mraa_beaglebone_spi_init_pre(int index)
 mraa_result_t mraa_beaglebone_i2c_init_pre(unsigned int bus)
 {
     mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
-    return ret;
+	if(bus == 0){
+			set_pinmux(5,"i2c");//P9_17 pinmap
+			set_pinmux(4,"i2c");//p9_18 pinmap
+	}
+    return MRAA_SUCCESS;
 }
 
 
@@ -297,7 +301,7 @@ mraa_board_t* mraa_beaglebone()
     b->i2c_bus_count = 2;
     b->def_i2c_bus = 0;
 
-    b->i2c_bus[0].bus_id = 0;
+    b->i2c_bus[0].bus_id = 1;
     b->i2c_bus[0].sda = 46 + 18;
     b->i2c_bus[0].scl = 46 + 17;
 
