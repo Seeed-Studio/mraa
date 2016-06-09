@@ -544,7 +544,8 @@ mraa_pininfo_t bbgw_pininfos[] = {
 		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 0, 0, 1 },
 			.gpio.pinmap = 15,
 			.gpio.parent_id = 0,
-			.gpio.mux_total = 0
+			.gpio.mux_total = 0,
+			.uart.mux_total = 0
 
 	},
 	//Pin[71]
