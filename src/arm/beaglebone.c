@@ -202,8 +202,16 @@ mraa_result_t mraa_beaglebone_uart_init_pre(int index)
 mraa_result_t mraa_beaglebone_spi_init_pre(int index)
 {
     mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
-
-    return ret;
+	int is_rev_c = get_board_model();
+	if(is_rev_c == 2)
+		return ret;
+	else{
+		set_pinmux(5,"spi");//P9_17 pinmap
+		set_pinmux(4,"spi");//p9_18 pinmap
+		set_pinmux(3,"spi");//P9_21 pinmap
+		set_pinmux(2,"spi");//p9_22 pinmap
+	}
+    return MRAA_SUCCESS;
 }
 
 mraa_result_t mraa_beaglebone_i2c_init_pre(unsigned int bus)
@@ -241,7 +249,7 @@ static int is_cape_load(unsigned int is_rev_c)
 	if(is_rev_c == 2)
 		 	strncpy(capename, "univ-bbgw", 16);
 		else
-			strncpy(capename, "cape-universal", 16);
+			return 0;
 	if(!mraa_file_contains(SYSFS_DEVICES_CAPEMGR_SLOTS, capename)){
 		syslog(LOG_INFO, "%s doesnt load ",capename);
 		capepath = mraa_file_unglob(SYSFS_DEVICES_CAPEMGR_SLOTS);
@@ -339,23 +347,16 @@ mraa_board_t* mraa_beaglebone()
 
 
     b->def_spi_bus = 0;
-    b->spi_bus[0].bus_id = 1;
-    b->spi_bus[0].slave_s = 0;
-    b->spi_bus[0].cs = 46 + 17;
-    b->spi_bus[0].mosi = 46 + 18;
-    b->spi_bus[0].miso = 46 + 21;
-    b->spi_bus[0].sclk = 46 + 22;
-	
     if (is_rev_c == 2)
-        b->spi_bus_count = 1;
+        b->spi_bus_count = 0;
     else{
-	    b->spi_bus_count = 2;
-	    b->spi_bus[1].bus_id = 2;
-	    b->spi_bus[1].slave_s = 0;
-	    b->spi_bus[1].cs = 46 + 28;
-	    b->spi_bus[1].mosi = 46 + 29;
-	    b->spi_bus[1].miso = 46 + 30;
-	    b->spi_bus[1].sclk = 46 + 31;
+	    b->spi_bus_count = 1;
+		b->spi_bus[0].bus_id = 1;
+		b->spi_bus[0].slave_s = 0;
+		b->spi_bus[0].cs = 46 + 17;
+		b->spi_bus[0].mosi = 46 + 18;
+		b->spi_bus[0].miso = 46 + 21;
+		b->spi_bus[0].sclk = 46 + 22;
     }
 
     b->def_uart_dev = 0;
