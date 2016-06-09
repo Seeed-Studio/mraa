@@ -165,8 +165,38 @@ mraa_result_t mraa_beaglebone_aio_init_internal_replace (mraa_aio_context dev, i
 mraa_result_t mraa_beaglebone_uart_init_pre(int index)
 {
     mraa_result_t ret = MRAA_ERROR_NO_RESOURCES;
+	switch(index){
+		case 0:{//ttyO1
+			set_pinmux(14,"uart");//P9_26
+			set_pinmux(15,"uart");//P9_24
+			break;
+			}
+		case 1:{//ttyO2
+			set_pinmux(2,"uart");//P9_22
+			set_pinmux(3,"uart");//P9_21
+			break;
+			}
+		case 2:{//ttyO3
+			int is_rev_c = get_board_model();
+			if(2 != is_rev_c)
+				set_pinmux(75,"uart");//P8_42
+			break;
+			}
+		case 3:{//ttyO4
+			set_pinmux(31,"uart");//P9_13
+			set_pinmux(30,"uart");//P9_11
+			break;
+			}
+		case 4:{//ttyO5
+			set_pinmux(79,"uart");//P8_38
+			set_pinmux(78,"uart");//P8_37
+			break;
+			}
+		default:
+			return MRAA_ERROR_NO_RESOURCES;
+	}
 
-    return ret;
+    return MRAA_SUCCESS;
 }
 
 mraa_result_t mraa_beaglebone_spi_init_pre(int index)
@@ -289,9 +319,7 @@ mraa_board_t* mraa_beaglebone()
 	if(is_rev_c == 3)
 		b->pins = bbg_pininfos;
 	b->adv_func->gpio_init_pre = &mraa_beaglebone_gpio_init_pre;
-	//b->adv_func->aio_get_valid_fp = &mraa_beaglebone_aio_get_fp;
 	b->adv_func->aio_init_internal_replace =  &mraa_beaglebone_aio_init_internal_replace;
-	//b->adv_func->aio_init_pre = &mraa_beaglebone_aio_init_pre;
 	b->adv_func->uart_init_pre = &mraa_beaglebone_uart_init_pre;
 	b->adv_func->spi_init_pre = &mraa_beaglebone_spi_init_pre;
 	b->adv_func->i2c_init_pre = &mraa_beaglebone_i2c_init_pre;
