@@ -650,11 +650,10 @@ mraa_pininfo_t bbg_pininfos[] = {
 	//Pin[76]
 	{ 
 		.name = "P9_30",
-		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 1, 0, 0, 1, 0, 0 },
+		.capabilites  = (mraa_pincapabilities_t){ 1, 1, 0, 0, 0, 1, 0, 0 },
 			.gpio.pinmap = 112,
 			.gpio.parent_id = 0,
 			.gpio.mux_total = 0,
-			.pwm.pinmap = 12,
 			.pwm.mux_total = 0,
 			.spi.mux_total = 0
 	},
