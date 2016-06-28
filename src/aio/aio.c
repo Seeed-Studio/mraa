@@ -88,6 +88,7 @@ mraa_aio_init(unsigned int aio)
 {
     mraa_board_t* board = plat;
     int pin;
+	int i;
     if (board == NULL) {
         syslog(LOG_ERR, "aio: Platform not initialised");
         return NULL;
@@ -101,9 +102,17 @@ mraa_aio_init(unsigned int aio)
         }
         aio = mraa_get_sub_platform_index(aio);
     }
-
+	for(i = 0; i < board->phy_pin_count; i++)
+	{
+		if(aio == board->pins[i].aio.pinmap)
+			{
+				pin = i;
+				break;
+			}
+	}
     // aio are always past the gpio_count in the pin array
-    pin = aio + board->gpio_count;
+    //pin = aio + board->gpio_count;
+
 
     if (pin < 0 || pin >= board->phy_pin_count) {
         syslog(LOG_ERR, "aio: pin %i beyond platform definition", pin);
@@ -162,7 +171,6 @@ mraa_aio_read(mraa_aio_context dev)
 
     char buffer[17];
     unsigned int shifter_value = 0;
-
     if (dev->adc_in_fp == -1) {
         if (aio_get_valid_fp(dev) != MRAA_SUCCESS) {
             syslog(LOG_ERR, "aio: Failed to get to the device");

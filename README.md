@@ -32,7 +32,7 @@ ARM
 ---
 * [Raspberry Pi](../master/docs/raspberry_pi.md)
 * [Bannana Pi](../master/docs/banana_pi.md)
-* [Beaglebone Black](../master/docs/beaglebone.md)
+* [Beaglebone Green](../master/docs/beaglebone.md)
 
 USB
 ---

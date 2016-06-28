@@ -23,12 +23,14 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 import mraa
-
+import time
 print (mraa.getVersion())
 
 try:
-    x = mraa.Aio(0)
-    print (x.read())
-    print ("%.5f" % x.readFloat())
+    x = mraa.Aio(1)
+    while True:
+    	print (x.read())
+    	print ("%.5f" % x.readFloat())
+	time.sleep(1)
 except:
     print ("Are you sure you have an ADC?")
